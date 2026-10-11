@@ -1,8 +1,10 @@
 <!DOCTYPE html>
-<html lang="en"><head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Wireline SL Kit Finder</title>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <script>
     // SharePoint Sandbox Shield: Prevents SecurityError when embedded in sandboxed srcdoc iframes
     (function() {
@@ -56,6 +58,11 @@
       margin: 0;
       padding: 30px 16px;
       color: #222;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
     }
 
     select:disabled {
@@ -69,11 +76,132 @@
       border: 6px solid #333;
       border-radius: 16px;
       background: #fff;
-      max-width: 560px;
+      width: 100%;
+      max-width: 600px;
       margin: 0 auto;
       padding: 24px;
       box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
       position: relative;
+      transition: max-width 0.25s ease, padding 0.25s ease;
+    }
+
+    .kit-finder-container.widescreen-mode {
+      max-width: min(96vw, 1360px) !important;
+    }
+
+    .selectors-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .form-group-item {
+      display: flex;
+      flex-direction: column;
+      margin-bottom: 0;
+    }
+
+    .form-group-item label {
+      margin-top: 14px;
+      margin-bottom: 6px;
+    }
+
+    .btn-width-toggle {
+      padding: 8px 12px;
+      font-size: 0.9em;
+      border-radius: 8px;
+      border: 1.5px solid #333;
+      background: #fff;
+      cursor: pointer;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition: background 0.15s ease, color 0.15s ease;
+    }
+
+    .btn-width-toggle:hover {
+      background: #f4f4f4;
+    }
+
+    .btn-width-toggle.active {
+      background: #333;
+      color: #fff;
+    }
+
+    /* PC / Desktop Responsive Scaling */
+    @media (min-width: 768px) {
+      body {
+        padding: 36px 20px;
+      }
+      .kit-finder-container {
+        max-width: 860px;
+        padding: 32px 36px;
+      }
+      .selectors-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px 28px;
+        margin-top: 6px;
+      }
+      .selectors-grid .form-group-item label {
+        margin-top: 0;
+      }
+      .modal-card {
+        max-width: 700px;
+        padding: 26px 30px;
+      }
+      .bom-table-scroll {
+        max-height: 460px;
+      }
+      .bom-table .col-desc {
+        max-width: 280px;
+      }
+      .bom-table th.th-desc {
+        max-width: 280px;
+      }
+      .result {
+        padding: 20px 24px;
+      }
+      .kit-part-number {
+        font-size: 2.3em;
+      }
+    }
+
+    @media (min-width: 1024px) {
+      body {
+        padding: 44px 28px;
+      }
+      .kit-finder-container {
+        max-width: 1060px;
+        padding: 38px 46px;
+      }
+      .selectors-grid {
+        gap: 18px 32px;
+      }
+      .modal-card {
+        max-width: 780px;
+        padding: 30px 34px;
+      }
+      .bom-table-scroll {
+        max-height: 520px;
+      }
+      .bom-table .col-desc {
+        max-width: 360px;
+      }
+      .bom-table th.th-desc {
+        max-width: 360px;
+      }
+      .title {
+        font-size: 2.25em;
+        margin: 12px 0 24px 0;
+      }
+    }
+
+    @media (min-width: 1400px) {
+      .kit-finder-container {
+        max-width: 1160px;
+      }
     }
 
     .header-bar {
@@ -278,6 +406,510 @@
 
     .btn-del-part:hover {
       background: #f8d7da;
+    }
+
+    .btn-bom {
+      padding: 6px 12px;
+      font-size: 0.8em;
+      background: #eef2ff;
+      color: #001489;
+      border: 1px solid #b8c8ff;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.15s ease;
+      position: relative;
+    }
+
+    .btn-bom:hover {
+      background: #001489;
+      color: #fff;
+      border-color: #001489;
+    }
+
+    .btn-bom.active {
+      background: #001489;
+      color: #fff;
+      border-color: #000f6b;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+    }
+
+    .btn-bom .bom-dot {
+      display: inline-block;
+      width: 7px;
+      height: 7px;
+      background: #00875a;
+      border-radius: 50%;
+      margin-left: 2px;
+    }
+
+    .bom-table-container {
+      width: 100%;
+      margin-top: 14px;
+      border: 2px solid #001489;
+      border-radius: 10px;
+      background: #ffffff;
+      overflow: hidden;
+      box-shadow: 0 4px 14px rgba(0, 20, 137, 0.08);
+      text-align: left;
+    }
+
+    .bom-header {
+      background: #001489;
+      color: #ffffff;
+      padding: 8px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .bom-title-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .bom-title {
+      font-size: 0.88em;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .bom-badge-count {
+      background: rgba(255, 255, 255, 0.2);
+      color: #ffffff;
+      font-size: 0.72em;
+      font-weight: 800;
+      padding: 2px 6px;
+      border-radius: 10px;
+      text-transform: uppercase;
+    }
+
+    .bom-subtext {
+      font-size: 0.72em;
+      color: #c9d6ff;
+      font-family: monospace;
+      margin-top: 2px;
+    }
+
+    .bom-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .bom-btn-sm {
+      padding: 4px 8px;
+      font-size: 0.72em;
+      font-weight: bold;
+      background: rgba(255, 255, 255, 0.15);
+      color: #ffffff;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 4px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: background 0.15s ease;
+    }
+
+    .bom-btn-sm:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    .bom-btn-close {
+      background: transparent;
+      border: none;
+      color: #ffffff;
+      font-size: 1.2em;
+      cursor: pointer;
+      line-height: 1;
+      padding: 2px 6px;
+      border-radius: 4px;
+      opacity: 0.8;
+    }
+
+    .bom-btn-close:hover {
+      opacity: 1;
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .bom-search-bar {
+      padding: 8px 12px;
+      background: #f8f9fc;
+      border-bottom: 1px solid #e2e8f0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .bom-search-input {
+      flex: 1;
+      padding: 6px 10px;
+      font-size: 0.8em;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      background: #ffffff;
+      outline: none;
+    }
+
+    .bom-search-input:focus {
+      border-color: #001489;
+    }
+
+    .bom-table-scroll {
+      max-height: 320px;
+      overflow-y: auto;
+      overflow-x: auto;
+    }
+
+    .bom-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.78em;
+      text-align: left;
+    }
+
+    .bom-table th {
+      position: sticky;
+      top: 0;
+      background: #f1f5f9;
+      color: #334155;
+      font-weight: 700;
+      text-transform: uppercase;
+      font-size: 0.72em;
+      letter-spacing: 0.5px;
+      padding: 8px 10px;
+      border-bottom: 1px solid #cbd5e1;
+      white-space: nowrap;
+      z-index: 2;
+    }
+
+    .bom-table td {
+      padding: 7px 10px;
+      border-bottom: 1px solid #e2e8f0;
+      white-space: nowrap;
+      color: #1e293b;
+    }
+
+    .bom-table tr:hover td {
+      background: #f0f7ff;
+    }
+
+    .bom-table .col-partnum {
+      font-family: monospace;
+      font-weight: 700;
+      color: #d60000;
+      font-size: 1.25em; /* 2 sizes bigger for better readability */
+      white-space: nowrap;
+    }
+
+    .bom-table .col-qty {
+      font-family: monospace;
+      font-weight: 700;
+      color: #d60000;
+      font-size: 1.25em; /* 2 sizes bigger for better readability */
+      width: 58px;
+      min-width: 54px;
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    .bom-table .col-desc {
+      font-size: 0.72em;
+      color: #475569;
+      max-width: 140px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      line-height: 1.25;
+    }
+
+    .bom-table th.th-desc {
+      max-width: 140px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .bom-table th.th-qty {
+      width: 58px;
+      min-width: 54px;
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    .bom-copy-pn-btn {
+      padding: 2px 6px;
+      font-size: 0.72em;
+      font-weight: bold;
+      background: #f1f5f9;
+      color: #334155;
+      border: 1px solid #cbd5e1;
+      border-radius: 4px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+    }
+
+    .bom-copy-pn-btn:hover {
+      background: #001489;
+      color: #ffffff;
+      border-color: #001489;
+    }
+
+    .bom-raw-json {
+      background: #1e1e1e;
+      color: #d4d4d4;
+      font-family: monospace;
+      font-size: 0.75em;
+      padding: 12px;
+      max-height: 320px;
+      overflow: auto;
+      margin: 0;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+
+    .bom-empty-box {
+      padding: 14px 16px;
+      background: #fffbeb;
+      border: 1.5px solid #fde68a;
+      border-radius: 8px;
+      margin-top: 10px;
+      text-align: left;
+      font-size: 0.82em;
+      color: #92400e;
+    }
+
+    .btn-bom-upload {
+      padding: 8px 14px;
+      font-size: 0.82em;
+      font-weight: bold;
+      background: #001489;
+      color: #ffffff;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: background 0.15s ease;
+    }
+
+    .btn-bom-upload:hover {
+      background: #000f6b;
+    }
+
+    .badge-bom-attached {
+      background: #dcfce7;
+      color: #166534;
+      border: 1px solid #86efac;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 0.72em;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+
+    .badge-bom-none {
+      background: #f1f5f9;
+      color: #64748b;
+      border: 1px solid #cbd5e1;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 0.72em;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    /* BlueMM & Part Number Search Bottom Row */
+    .bluemm-search-bottom-row {
+      margin-top: 14px;
+      padding-top: 12px;
+      border-top: 1px solid #e2e8f0;
+      width: 100%;
+      text-align: left;
+    }
+
+    .bluemm-bar-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .bluemm-search-box {
+      flex: 1;
+      min-width: 200px;
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .bluemm-search-input {
+      width: 100%;
+      padding: 7px 28px 7px 30px;
+      font-size: 0.85em;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      background: #ffffff;
+      outline: none;
+      font-family: monospace;
+      color: #1e293b;
+      box-sizing: border-box;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .bluemm-search-input:focus {
+      border-color: #001489;
+      box-shadow: 0 0 0 2px rgba(0, 20, 137, 0.15);
+    }
+
+    .bluemm-search-icon {
+      position: absolute;
+      left: 9px;
+      font-size: 0.85em;
+      color: #94a3b8;
+      pointer-events: none;
+    }
+
+    .bluemm-clear-btn {
+      position: absolute;
+      right: 6px;
+      background: transparent;
+      border: none;
+      color: #94a3b8;
+      cursor: pointer;
+      font-size: 1.1em;
+      line-height: 1;
+      padding: 2px 4px;
+    }
+
+    .bluemm-clear-btn:hover {
+      color: #334155;
+    }
+
+    .btn-bluemm-action {
+      background: #001489;
+      color: #ffffff;
+      border: none;
+      border-radius: 6px;
+      padding: 8px 14px;
+      font-size: 0.82em;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      transition: background 0.15s ease, transform 0.05s ease;
+    }
+
+    .btn-bluemm-action:hover {
+      background: #000f66;
+    }
+
+    .btn-bluemm-action:active {
+      transform: scale(0.98);
+    }
+
+    .bluemm-results-card {
+      margin-top: 10px;
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      padding: 10px 12px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+    }
+
+    .bluemm-results-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 6px;
+      margin-bottom: 8px;
+      border-bottom: 1px solid #e2e8f0;
+      font-size: 0.78em;
+      font-weight: 700;
+      color: #1e293b;
+    }
+
+    .bluemm-result-item {
+      padding: 8px 10px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      margin-bottom: 6px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .bluemm-result-item:last-child {
+      margin-bottom: 0;
+    }
+
+    .bluemm-result-item:hover {
+      background: #f0f7ff;
+      border-color: #93c5fd;
+    }
+
+    .bluemm-result-pn {
+      font-family: monospace;
+      font-weight: 700;
+      color: #d60000;
+      font-size: 1.15em;
+    }
+
+    .bluemm-result-qty {
+      font-family: monospace;
+      font-weight: 700;
+      color: #d60000;
+      font-size: 1.15em;
+    }
+
+    .bluemm-btn-mini {
+      padding: 3px 8px;
+      font-size: 0.72em;
+      font-weight: 600;
+      border-radius: 4px;
+      border: 1px solid #cbd5e1;
+      background: #ffffff;
+      color: #334155;
+      cursor: pointer;
+    }
+
+    .bluemm-btn-mini:hover {
+      background: #f1f5f9;
+    }
+
+    .bluemm-btn-select {
+      padding: 3px 8px;
+      font-size: 0.72em;
+      font-weight: 700;
+      border-radius: 4px;
+      border: none;
+      background: #dbeafe;
+      color: #001489;
+      cursor: pointer;
+    }
+
+    .bluemm-btn-select:hover {
+      background: #bfdbfe;
     }
 
     .badge-custom {
@@ -573,21 +1205,27 @@
 <body>
 
   <!-- Toast Element -->
-  <div id="toast" class="toast-box" style="display: block;">Admin access granted.</div>
+  <div id="toast" class="toast-box"></div>
 
   <div class="kit-finder-container">
     <div class="header-bar">
-      <img
-        class="slb-logo"
-        src="Logo.png"
-        alt="SLB Logo"
-        onerror="this.onerror=null; this.src='https://upload.wikimedia.org/wikipedia/commons/d/d6/SLB_Logo_2022.svg';"
-      />
+      <!-- SLB Logo -->
+      <svg class="slb-logo" id="slbLogoSvg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1350 950" aria-label="SLB Logo" role="img">
+        <path fill="#001489" d="M647,635c-191.38-153.23-271.22-350-472-350v350h472Z"/>
+        <path fill="#001489" d="M1054.03,279.75c-39.08,0-74.02,17-94.28,41.96V175h-47.25v350h38.9l4.99-36.79c13.72,18.37,41.67,42.04,95.37,42.04,72.14,0,123.25-51.57,123.25-124.67s-49.04-125.83-120.97-125.83Zm-12.94,206.66c-52.04,0-83.11-30.98-83.11-81.34s31.83-81.34,83.11-81.34,83.11,30.98,83.11,81.34-31.83,81.34-83.11,81.34Z"/>
+        <rect fill="#001489" x="830.25" y="175" width="47.25" height="350"/>
+        <path fill="#001489" d="M696.69,489.45c-34.46,0-70.64-16.81-90.07-40.97l-31.87,30.33c31.08,35.22,71.73,51.44,119.9,51.44,66.11,0,107.6-29.45,107.6-79.11,0-103.23-179.33-38.67-179.33-96.85,0-21.29,24.83-33.35,63.5-33.35,34.46,0,59.34,11.17,74.81,27.14l31.87-30.33c-21.1-22.7-60.83-38-105.49-38-66.81,0-110.76,31.61-110.76,81.63,0,100.39,178.62,36.54,178.62,95.07,0,20.58-23.28,32.99-58.79,32.99Z"/>
+        <path fill="#001489" d="M1169.75,600h-510.75c105.43,86.03,267.31,175,510.75,175v-175Z"/>
+      </svg>
 
       <div class="header-actions">
         <!-- Admin Console / Lock Button -->
-        <button type="button" class="btn-admin" id="openAdminBtn" title="Admin Console (Click to unlock)">
-          <span>🔒</span> <span id="adminBtnText">Admin</span>
+        <button type="button" class="btn-admin" id="openAdminBtn" title="Admin Console (Click to enter password)">
+          <span>&#128274;</span> <span id="adminBtnText">Admin</span>
+        </button>
+        <!-- Widescreen / Scale Toggle Button -->
+        <button type="button" class="btn-width-toggle" id="widthToggleBtn" title="Toggle Widescreen PC View">
+          <span id="widthToggleIcon">&#x26F6;</span>
         </button>
         <!-- Help Button -->
         <button type="button" class="btn-help" id="helpBtn">Help</button>
@@ -595,30 +1233,46 @@
     </div>
 
     <!-- On-page help message -->
-    <div id="helpMessage" class="help-message" style="display: none;">
+    <div id="helpMessage" class="help-message">
       For help, correction, or addition of newly released kits please send a message to <a href="mailto:rsuruelos@slb.com">rsuruelos@slb.com</a>
     </div>
 
     <div class="title">Wireline SL Kit Finder</div>
 
-    <label for="family">Family:</label>
-    <select id="family"><option value="" selected="">Select Family</option></select>
+    <!-- Responsive Selectors Grid -->
+    <div class="selectors-grid">
+      <div class="form-group-item">
+        <label for="family">Family:</label>
+        <select id="family">
+          <option value="">Select Family</option>
+        </select>
+      </div>
 
-    <label for="asset">Asset Name:</label>
-    <select id="asset" disabled=""><option value="" selected="">Select Asset</option></select>
+      <div class="form-group-item">
+        <label for="asset">Asset Name:</label>
+        <select id="asset" disabled>
+          <option value="">Select Asset</option>
+        </select>
+      </div>
 
-    <label for="maintenance">Maintenance Type:</label>
-    <select id="maintenance" disabled=""><option value="" selected="">Select Maintenance Type</option></select>
+      <div class="form-group-item">
+        <label for="maintenance">Maintenance Type:</label>
+        <select id="maintenance" disabled>
+          <option value="">Select Maintenance Type</option>
+        </select>
+      </div>
 
-    <label for="level">Level:</label>
-    <select id="level" disabled=""><option value="" selected="">Select Level</option></select>
+      <div class="form-group-item">
+        <label for="level">Level:</label>
+        <select id="level" disabled>
+          <option value="">Select Level</option>
+        </select>
+      </div>
+    </div>
 
     <div id="result" class="result">
-            <div class="result-placeholder">
-              <div style="font-size: 2em; margin-bottom: 8px; opacity: 0.7;">🔍</div>
-              <div>Select a Sonde tool to view maintenance kits</div>
-            </div>
-          </div>
+      <div style="color: #888; font-size: 0.9em;">Select Family, Asset, Maintenance Type, and Level</div>
+    </div>
 
     <div class="footer-bar">
       <span id="kitCount">Total Kits: 110</span>
@@ -629,11 +1283,11 @@
   <!-- ======================================================== -->
   <!-- 1. IN-PAGE ADMIN PASSWORD MODAL (No window.prompt!)      -->
   <!-- ======================================================== -->
-  <div id="authModal" class="modal-overlay" style="display: none;">
+  <div id="authModal" class="modal-overlay">
     <div class="modal-card" style="max-width: 400px;">
       <div class="modal-header">
         <h3>Admin Authorization</h3>
-        <button type="button" class="modal-close" id="closeAuthModalBtn">×</button>
+        <button type="button" class="modal-close" id="closeAuthModalBtn">&times;</button>
       </div>
 
       <div class="alert-info" style="margin-bottom:12px;">
@@ -647,7 +1301,14 @@
       <div id="authFormArea">
         <div class="form-group">
           <label for="authPassword">Password</label>
-          <input type="password" id="authPassword" placeholder="Enter password..." style="font-size: 1.1em; letter-spacing: 2px;" autocomplete="current-password" required="">
+          <input
+            type="password"
+            id="authPassword"
+            placeholder="Enter password..."
+            style="font-size: 1.1em; letter-spacing: 2px;"
+            autocomplete="current-password"
+            required
+          />
         </div>
 
         <div class="form-actions">
@@ -661,7 +1322,7 @@
   <!-- ======================================================== -->
   <!-- 2. IN-PAGE ADMIN HUB MODAL (Tabs: Add, Edit, Delete)     -->
   <!-- ======================================================== -->
-  <div id="adminHubModal" class="modal-overlay" style="display: none;">
+  <div id="adminHubModal" class="modal-overlay">
     <div class="modal-card" style="max-width: 580px;">
       <div class="modal-header">
         <div>
@@ -669,9 +1330,9 @@
           <div style="font-size: 0.75em; color: #666; margin-top: 2px;">Wireline SL Kit Database Management</div>
         </div>
         <div style="display:flex; align-items:center; gap:8px;">
-          <button type="button" id="adminDownloadHtmlBtn" class="btn-download-sharepoint" title="Download updated HTML file to overwrite file in SharePoint">📥 Download for SharePoint</button>
-          <button type="button" id="lockAdminModalBtn" style="padding:5px 10px; font-size:0.8em; font-weight:bold; background:#fff3cd; color:#856404; border:1px solid #ffeeba; border-radius:6px; cursor:pointer;" title="Lock Admin mode and secure file">🔒 Lock</button>
-          <button type="button" class="modal-close" id="closeAdminHubBtn">×</button>
+          <button type="button" id="adminDownloadHtmlBtn" class="btn-download-sharepoint" title="Download updated HTML file to overwrite file in SharePoint">&#128229; Download for SharePoint</button>
+          <button type="button" id="lockAdminModalBtn" style="padding:5px 10px; font-size:0.8em; font-weight:bold; background:#fff3cd; color:#856404; border:1px solid #ffeeba; border-radius:6px; cursor:pointer;" title="Lock Admin mode and secure file">&#128274; Lock</button>
+          <button type="button" class="modal-close" id="closeAdminHubBtn">&times;</button>
         </div>
       </div>
 
@@ -680,14 +1341,14 @@
         <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap;">
           <div style="flex: 1; min-width: 240px;">
             <div style="font-weight: bold; font-size: 0.85em; color: #002b66; display: flex; align-items: center; gap: 5px;">
-              <span>💾</span> SharePoint File Overwrite
+              <span>&#128190;</span> SharePoint File Overwrite
             </div>
             <div style="font-size: 0.78em; color: #33547a; margin-top: 2px; line-height: 1.35;">
               Edits made here are saved locally. After editing, download the updated HTML file below and drag &amp; drop it into SharePoint to update it for all users.
             </div>
           </div>
           <button type="button" id="bannerDownloadHtmlBtn" class="btn-sync-action">
-            📥 Download Updated HTML
+            &#128229; Download Updated HTML
           </button>
         </div>
       </div>
@@ -704,13 +1365,16 @@
         <form id="addKitForm">
           <div class="form-group">
             <label for="mFamilySelect">Family *</label>
-            <select id="mFamilySelect"><option value="">-- Choose Existing Family --</option><option value="Caliper TOOLS">Caliper TOOLS</option><option value="FSI">FSI</option><option value="Imaging TOOLS">Imaging TOOLS</option><option value="MaxTRAC">MaxTRAC</option><option value="Release Device">Release Device</option><option value="SONDE Oils">SONDE Oils</option><option value="SPEAR/TTiX">SPEAR/TTiX</option><option value="Seismic TOOLS">Seismic TOOLS</option><option value="Sonic TOOLS">Sonic TOOLS</option><option value="Swivel Heads - ES">Swivel Heads - ES</option><option value="Swivel Heads - PS">Swivel Heads - PS</option><option value="ThruBIT">ThruBIT</option><option value="Tubing Cutter/Resolve iX">Tubing Cutter/Resolve iX</option><option value="TuffTRAC">TuffTRAC</option><option value="__custom__">+ Add New Family Name...</option></select>
-            <input type="text" id="mFamilyCustom" placeholder="Enter new family name" style="display: none; margin-top: 6px;">
+            <select id="mFamilySelect">
+              <option value="">-- Choose Existing Family --</option>
+              <option value="__custom__">+ Add New Family Name...</option>
+            </select>
+            <input type="text" id="mFamilyCustom" placeholder="Enter new family name" style="display:none; margin-top:6px;" />
           </div>
 
           <div class="form-group">
             <label for="mAsset">Asset Name *</label>
-            <input type="text" id="mAsset" placeholder="e.g. SPDRS-BA or MAMS-CA" required="">
+            <input type="text" id="mAsset" placeholder="e.g. SPDRS-BA or MAMS-CA" required />
           </div>
 
           <div class="form-group" style="display:flex; gap:10px;">
@@ -723,7 +1387,7 @@
                 <option value="Redress">Redress</option>
                 <option value="Custom">Custom...</option>
               </select>
-              <input type="text" id="mMaintenanceCustom" placeholder="Custom maint type" style="display:none; margin-top:6px;">
+              <input type="text" id="mMaintenanceCustom" placeholder="Custom maint type" style="display:none; margin-top:6px;" />
             </div>
 
             <div style="flex:1;">
@@ -736,24 +1400,24 @@
                 <option value="5">Level 5</option>
                 <option value="Custom">Custom...</option>
               </select>
-              <input type="text" id="mLevelCustom" placeholder="Custom level" style="display:none; margin-top:6px;">
+              <input type="text" id="mLevelCustom" placeholder="Custom level" style="display:none; margin-top:6px;" />
             </div>
           </div>
 
           <div class="form-group">
             <label for="mKit">Kit Part Number *</label>
-            <input type="text" id="mKit" placeholder="e.g. 102057866" required="" style="font-weight:bold; color:#d60000; font-family:monospace;">
+            <input type="text" id="mKit" placeholder="e.g. 102057866" required style="font-weight:bold; color:#d60000; font-family:monospace;" />
           </div>
 
           <div class="form-group">
             <label for="mNotes">Notes / Description (Optional)</label>
-            <input type="text" id="mNotes" placeholder="e.g. Low temp variant, O-rings included">
+            <input type="text" id="mNotes" placeholder="e.g. Low temp variant, O-rings included" />
           </div>
 
           <div class="form-actions">
             <button type="button" class="btn-cancel" id="cancelAddBtn">Close</button>
             <button type="submit" class="btn-save" id="saveAddKitBtn">Save Kit</button>
-            <button type="button" class="btn-save-download" id="saveAndDownloadAddBtn" title="Save this kit and download the updated HTML file">📥 Save &amp; Download HTML</button>
+            <button type="button" class="btn-save-download" id="saveAndDownloadAddBtn" title="Save this kit and download the updated HTML file">&#128229; Save &amp; Download HTML</button>
           </div>
         </form>
       </div>
@@ -765,10 +1429,12 @@
         </div>
 
         <div class="form-group">
-          <input type="text" id="editFilterInput" placeholder="Filter tools (e.g. SPDRS, MAXS, ECRD)...">
+          <input type="text" id="editFilterInput" placeholder="Filter tools (e.g. SPDRS, MAXS, ECRD)..." />
         </div>
 
-        <div class="tool-list-box" id="editToolListBox"></div>
+        <div class="tool-list-box" id="editToolListBox">
+          <!-- Dynamically populated -->
+        </div>
 
         <!-- Form for editing the selected tool -->
         <div id="editToolFormArea" style="display:none; border-top: 1px solid #ddd; padding-top: 12px;">
@@ -778,18 +1444,53 @@
 
           <div class="form-group">
             <label for="editPartNumberInput">Corrected Kit Part Number *</label>
-            <input type="text" id="editPartNumberInput" style="font-size: 1.2em; font-weight: bold; color: #d60000; font-family: monospace;" required="">
+            <input
+              type="text"
+              id="editPartNumberInput"
+              style="font-size: 1.2em; font-weight: bold; color: #d60000; font-family: monospace;"
+              required
+            />
           </div>
 
           <div class="form-group">
             <label for="editNotesInput">Notes / Correction reason</label>
-            <input type="text" id="editNotesInput" placeholder="e.g. Typo fix">
+            <input type="text" id="editNotesInput" placeholder="e.g. Typo fix" />
+          </div>
+
+          <!-- BOM Section inside Edit Tab -->
+          <div class="edit-bom-box" style="background:#f0f5ff; border:1.5px solid #c0d4ff; border-radius:8px; padding:12px; margin-bottom:14px;">
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:6px; flex-wrap:wrap; gap:6px;">
+              <div style="font-weight:bold; font-size:0.85em; color:#001489; display:flex; align-items:center; gap:5px;">
+                <span>&#128196;</span> Kit Bill of Materials (BOM)
+              </div>
+              <span id="editBomStatusBadge" class="badge-bom-none">No BOM Attached</span>
+            </div>
+            <div style="font-size:0.78em; color:#475569; margin-bottom:10px; line-height:1.35;">
+              Attach or update the Bill of Materials (JSON format) containing parts and quantities for this kit.
+            </div>
+
+            <input type="file" id="editBomFileInput" accept=".json,application/json" style="display:none;" />
+
+            <div style="display:flex; flex-wrap:wrap; gap:8px; align-items:center;">
+              <button type="button" id="editUploadBomBtn" class="btn-bom-upload">
+                &#128196; Upload or update json file for this kit's BOM
+              </button>
+              <button type="button" id="editPreviewBomBtn" class="btn-cancel" style="display:none; padding:7px 12px; font-size:0.8em;">
+                Preview BOM Table
+              </button>
+              <button type="button" id="editRemoveBomBtn" class="btn-del-part" style="display:none; padding:7px 12px; font-size:0.8em;">
+                Remove BOM
+              </button>
+            </div>
+
+            <div id="editBomError" class="alert-error" style="display:none; margin-top:8px; font-size:0.8em; padding:6px 10px;"></div>
+            <div id="editBomPreviewArea" style="display:none; margin-top:10px;"></div>
           </div>
 
           <div class="form-actions">
             <button type="button" class="btn-cancel" id="cancelEditBtn">Cancel</button>
             <button type="button" class="btn-save" id="saveEditBtn">Save Correction</button>
-            <button type="button" class="btn-save-download" id="saveAndDownloadEditBtn" title="Save correction and download the updated HTML file">📥 Save &amp; Download HTML</button>
+            <button type="button" class="btn-save-download" id="saveAndDownloadEditBtn" title="Save correction and download the updated HTML file">&#128229; Save &amp; Download HTML</button>
           </div>
         </div>
       </div>
@@ -797,14 +1498,16 @@
       <!-- TAB 3: DELETE / MANAGE KITS -->
       <div id="tabContentManage" class="tab-content">
         <div class="form-group">
-          <input type="text" id="manageFilterInput" placeholder="Search tool or part number to delete...">
+          <input type="text" id="manageFilterInput" placeholder="Search tool or part number to delete..." />
         </div>
 
-        <div class="tool-list-box" id="manageToolListBox" style="max-height: 280px;"></div>
+        <div class="tool-list-box" id="manageToolListBox" style="max-height: 280px;">
+          <!-- Dynamically populated -->
+        </div>
 
         <div class="form-actions" style="justify-content: space-between;">
           <button type="button" class="btn-cancel" id="closeManageBtn">Close</button>
-          <button type="button" class="btn-download-sharepoint" id="manageDownloadHtmlBtn">📥 Download Updated HTML</button>
+          <button type="button" class="btn-download-sharepoint" id="manageDownloadHtmlBtn">&#128229; Download Updated HTML</button>
         </div>
       </div>
     </div>
@@ -813,10 +1516,12 @@
   <!-- ======================================================== -->
   <!-- 3. IN-PAGE CONFIRM DELETE MODAL (No window.confirm!)     -->
   <!-- ======================================================== -->
-  <div id="confirmDeleteModal" class="modal-overlay" style="display: none;">
+  <div id="confirmDeleteModal" class="modal-overlay">
     <div class="modal-card" style="max-width: 400px; text-align: center;">
       <h3 style="color:#b00020; margin-top:0;">Confirm Deletion</h3>
-      <p id="confirmDeleteMsg" style="font-size: 0.9em; color:#444; margin: 16px 0;">Are you sure you want to delete kit entry <strong>#126546849</strong> for <strong>fnfn</strong> (ora)?</p>
+      <p id="confirmDeleteMsg" style="font-size: 0.9em; color:#444; margin: 16px 0;">
+        Are you sure you want to delete this kit?
+      </p>
       <div style="display: flex; justify-content: center; gap: 12px;">
         <button type="button" class="btn-cancel" id="cancelDeleteBtn">Cancel</button>
         <button type="button" class="btn-save" id="confirmDeleteBtn" style="background:#c9302c;">Delete</button>
@@ -831,28 +1536,114 @@
     const ADMIN_PASSWORD = '9710713';
 
     // === EMBEDDED_DATASET_START ===
-    const DATA_VERSION = '1791666868130';
+    const DATA_VERSION = '1791753487686';
     const INITIAL_KITS = [
   {
     "asset": "SPDRS-BA",
     "maintenance": "SLS",
     "level": "1",
     "kit": "102057866",
-    "family": "SPEAR/TTiX"
+    "family": "SPEAR/TTiX",
+    "bom": [
+      {
+        "partNumber": "100234511",
+        "description": "O-RING VITON 75D 2-014",
+        "qty": "4"
+      },
+      {
+        "partNumber": "100459201",
+        "description": "BACKUP RING TEFLON SPIRAL",
+        "qty": "2"
+      },
+      {
+        "partNumber": "100345678",
+        "description": "HEX SOCKET HEAD CAP SCREW M4X12",
+        "qty": "8"
+      },
+      {
+        "partNumber": "100789012",
+        "description": "SEAL RING DUAL LIP NITRILE",
+        "qty": "2"
+      },
+      {
+        "partNumber": "B015518",
+        "description": "CAPELLA OIL LUBRICANT 50ML",
+        "qty": "1"
+      },
+      {
+        "partNumber": "H987654",
+        "description": "SPRING WASHER HIGH RESILIENCE",
+        "qty": "6"
+      }
+    ]
   },
   {
     "asset": "SPDRS-BA",
     "maintenance": "SLS",
     "level": "2",
     "kit": "102059436",
-    "family": "SPEAR/TTiX"
+    "family": "SPEAR/TTiX",
+    "bom": [
+      {
+        "partNumber": "100234511",
+        "description": "O-RING VITON 75D 2-014",
+        "qty": "8"
+      },
+      {
+        "partNumber": "100459201",
+        "description": "BACKUP RING TEFLON SPIRAL",
+        "qty": "4"
+      },
+      {
+        "partNumber": "100561234",
+        "description": "THRUST BEARING BALL ROLLER ASSEMBLY",
+        "qty": "1"
+      },
+      {
+        "partNumber": "100892345",
+        "description": "LOCKING NUT NYLON INSERT M6",
+        "qty": "12"
+      },
+      {
+        "partNumber": "100912389",
+        "description": "FEED-THROUGH CONNECTOR 4-PIN GOLD",
+        "qty": "2"
+      },
+      {
+        "partNumber": "B015518",
+        "description": "CAPELLA OIL LUBRICANT 50ML",
+        "qty": "2"
+      }
+    ]
   },
   {
     "asset": "SPDRS-BA",
     "maintenance": "SLS",
     "level": "3",
     "kit": "102059459",
-    "family": "SPEAR/TTiX"
+    "family": "SPEAR/TTiX",
+    "bom": [
+      {
+        "partNumber": "100234511",
+        "description": "O-RING VITON 75D 2-014",
+        "qty": "12"
+      },
+      {
+        "partNumber": "100674321",
+        "description": "COMPRESSION SLEEVE INCONEL 718",
+        "qty": "2"
+      },
+      {
+        "partNumber": "100789012",
+        "description": "SEAL RING DUAL LIP NITRILE",
+        "qty": "4"
+      },
+      {
+        "partNumber": "100994512",
+        "description": "PRESSURE TRANSDUCER SEAL KIT",
+        "qty": "1"
+      }
+    ]
   },
   {
     "asset": "SPDRS-BA",
@@ -1732,6 +2523,15 @@
     const saveEditBtn = document.getElementById('saveEditBtn');
     const saveAndDownloadEditBtn = document.getElementById('saveAndDownloadEditBtn');
 
+    // Tab 2 BOM elements
+    const editBomStatusBadge = document.getElementById('editBomStatusBadge');
+    const editBomFileInput = document.getElementById('editBomFileInput');
+    const editUploadBomBtn = document.getElementById('editUploadBomBtn');
+    const editPreviewBomBtn = document.getElementById('editPreviewBomBtn');
+    const editRemoveBomBtn = document.getElementById('editRemoveBomBtn');
+    const editBomError = document.getElementById('editBomError');
+    const editBomPreviewArea = document.getElementById('editBomPreviewArea');
+
     // Tab 3 Manage elements
     const manageFilterInput = document.getElementById('manageFilterInput');
     const manageToolListBox = document.getElementById('manageToolListBox');
@@ -1780,6 +2580,30 @@
         if (!helpMessage.contains(e.target) && !helpBtn.contains(e.target)) {
           helpMessage.style.display = 'none';
         }
+      });
+    }
+
+    // Widescreen / Scale Toggle
+    const widthToggleBtn = document.getElementById('widthToggleBtn');
+    const mainContainerEl = document.querySelector('.kit-finder-container');
+
+    if (widthToggleBtn && mainContainerEl) {
+      try {
+        const savedWide = localStorage.getItem('slb_kit_finder_widescreen');
+        if (savedWide === 'true') {
+          mainContainerEl.classList.add('widescreen-mode');
+          widthToggleBtn.classList.add('active');
+          widthToggleBtn.title = 'Switch to Standard Desktop View';
+        }
+      } catch (err) {}
+
+      widthToggleBtn.addEventListener('click', () => {
+        const isWide = mainContainerEl.classList.toggle('widescreen-mode');
+        widthToggleBtn.classList.toggle('active', isWide);
+        widthToggleBtn.title = isWide ? 'Switch to Standard Desktop View' : 'Toggle Widescreen PC View';
+        try {
+          localStorage.setItem('slb_kit_finder_widescreen', isWide ? 'true' : 'false');
+        } catch (err) {}
       });
     }
 
@@ -1888,6 +2712,542 @@
       });
     }
 
+    // ==========================================
+    // BOM (BILL OF MATERIALS) HELPERS & COMPONENT
+    // ==========================================
+    function isPartNumberCol(col) {
+      const l = col.toLowerCase();
+      return l === 'partnumber' || l === 'part_number' || l === 'partno' || l === 'pn' || l === 'part' || l === 'code' || l.includes('part');
+    }
+
+    function isDescriptionCol(col) {
+      const l = col.toLowerCase();
+      return l === 'description' || l === 'desc' || l === 'partdescription' || l === 'itemname' || l === 'name' || l.includes('desc');
+    }
+
+    function isQuantityCol(col) {
+      const l = col.toLowerCase();
+      return l === 'qty' || l === 'quantity' || l === 'count' || l === 'amount' || l.includes('qty') || l.includes('quantity');
+    }
+
+    function parseBOMData(bom) {
+      if (!bom) return { metadata: {}, columns: [], rows: [], rawJsonStr: '' };
+
+      let parsed = bom;
+      let rawJsonStr = '';
+
+      if (typeof bom === 'string') {
+        rawJsonStr = bom;
+        try {
+          parsed = JSON.parse(bom);
+        } catch (e) {
+          return { metadata: {}, columns: [], rows: [], rawJsonStr };
+        }
+      } else {
+        try {
+          rawJsonStr = JSON.stringify(bom, null, 2);
+        } catch (e) {
+          rawJsonStr = String(bom);
+        }
+      }
+
+      let items = [];
+      const metadata = {};
+
+      if (Array.isArray(parsed)) {
+        items = [...parsed];
+      } else if (typeof parsed === 'object' && parsed !== null) {
+        const arrayKeys = ['parts', 'items', 'bom', 'components', 'materials', 'rows', 'partslist', 'kititems'];
+        const foundKey = Object.keys(parsed).find(k => arrayKeys.includes(k.toLowerCase()) && Array.isArray(parsed[k])) ||
+                         Object.keys(parsed).find(k => Array.isArray(parsed[k]));
+
+        if (foundKey) {
+          items = [...parsed[foundKey]];
+          Object.keys(parsed).forEach(k => {
+            if (k !== foundKey && (typeof parsed[k] === 'string' || typeof parsed[k] === 'number')) {
+              metadata[k] = parsed[k];
+            }
+          });
+        } else {
+          items = Object.entries(parsed).map(([key, val], idx) => {
+            if (typeof val === 'object' && val !== null) {
+              return { item: idx + 1, partNumber: key, ...val };
+            }
+            return { item: idx + 1, partNumber: key, description: String(val) };
+          });
+        }
+      }
+
+      if (!items || items.length === 0) {
+        return { metadata, columns: [], rows: [], rawJsonStr };
+      }
+
+      const colSet = new Set();
+      items.forEach(it => {
+        if (typeof it === 'object' && it !== null) {
+          Object.keys(it).forEach(k => colSet.add(k));
+        }
+      });
+
+      // 1. Arrange columns: Part Number first, then Description, then QTY
+      let partCol = null;
+      let descCol = null;
+      let qtyCol = null;
+      const otherCols = [];
+
+      Array.from(colSet).forEach(col => {
+        if (!partCol && isPartNumberCol(col)) {
+          partCol = col;
+        } else if (!descCol && isDescriptionCol(col)) {
+          descCol = col;
+        } else if (!qtyCol && isQuantityCol(col)) {
+          qtyCol = col;
+        } else {
+          otherCols.push(col);
+        }
+      });
+
+      const preferredRemainingOrder = [
+        'item', 'itemnumber', 'item_no', 'itemno', 'pos', 'index',
+        'uom', 'unit',
+        'material', 'revision', 'rev',
+        'notes', 'remarks', 'comments'
+      ];
+
+      otherCols.sort((a, b) => {
+        const aIdx = preferredRemainingOrder.findIndex(p => p.toLowerCase() === a.toLowerCase());
+        const bIdx = preferredRemainingOrder.findIndex(p => p.toLowerCase() === b.toLowerCase());
+        if (aIdx >= 0 && bIdx >= 0) return aIdx - bIdx;
+        if (aIdx >= 0) return -1;
+        if (bIdx >= 0) return 1;
+        return a.localeCompare(b);
+      });
+
+      const columns = [];
+      if (partCol) columns.push(partCol);
+      if (descCol) columns.push(descCol);
+      if (qtyCol) columns.push(qtyCol);
+      columns.push(...otherCols);
+
+      // 2. Sort items: part number column arrange from small to big value, parts starting with letters come first
+      const pnCol = partCol || columns.find(isPartNumberCol) || 'partNumber';
+      items.sort((rowA, rowB) => {
+        const a = String(rowA[pnCol] ?? '').trim();
+        const b = String(rowB[pnCol] ?? '').trim();
+        if (!a && !b) return 0;
+        if (!a) return 1;
+        if (!b) return -1;
+
+        const aLetter = /^[a-zA-Z]/.test(a);
+        const bLetter = /^[a-zA-Z]/.test(b);
+
+        if (aLetter && !bLetter) return -1;
+        if (!aLetter && bLetter) return 1;
+
+        if (aLetter && bLetter) {
+          return a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' });
+        }
+
+        const numA = Number(a.replace(/[^0-9.]/g, ''));
+        const numB = Number(b.replace(/[^0-9.]/g, ''));
+        if (!isNaN(numA) && !isNaN(numB) && numA !== numB) {
+          return numA - numB;
+        }
+        return a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' });
+      });
+
+      return { metadata, columns, rows: items, rawJsonStr };
+    }
+
+    function escapeHtml(str) {
+      if (typeof str !== 'string') return String(str);
+      return str
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function copyTextToClipboard(text) {
+      try {
+        navigator.clipboard.writeText(text);
+      } catch (e) {
+        const temp = document.createElement('textarea');
+        temp.value = text;
+        document.body.appendChild(temp);
+        temp.select();
+        document.execCommand('copy');
+        document.body.removeChild(temp);
+      }
+    }
+
+    function formatColumnHeader(key) {
+      if (isPartNumberCol(key)) return 'Part Number';
+      if (isDescriptionCol(key)) return 'Description';
+      if (isQuantityCol(key)) return 'QTY';
+      const lower = key.toLowerCase();
+      if (lower === 'item' || lower === 'itemnumber' || lower === 'item_no') return 'Item #';
+      if (lower === 'uom' || lower === 'unit') return 'UOM';
+      return key
+        .replace(/([A-Z])/g, ' $1')
+        .replace(/[_-]/g, ' ')
+        .replace(/^\w/, c => c.toUpperCase())
+        .trim();
+    }
+
+    function exportBOMSpreadsheet(kit, bomInfo, format) {
+      const { columns, rows } = bomInfo;
+      const fileName = `BOM_${kit.asset}_${kit.kit}.${format}`;
+
+      if (typeof XLSX !== 'undefined') {
+        try {
+          const exportData = rows.map(r => {
+            const rowObj = {};
+            columns.forEach(col => {
+              rowObj[formatColumnHeader(col)] = r[col] !== undefined && r[col] !== null ? r[col] : '';
+            });
+            return rowObj;
+          });
+          const ws = XLSX.utils.json_to_sheet(exportData);
+          const wb = XLSX.utils.book_new();
+          XLSX.utils.book_append_sheet(wb, ws, "BOM");
+          XLSX.writeFile(wb, fileName, { bookType: format === 'ods' ? 'ods' : 'xlsx' });
+          showToast(`Exported ${fileName}`);
+          return;
+        } catch (e) {
+          console.warn('XLSX export fallback due to:', e);
+        }
+      }
+
+      // Offline XML SpreadsheetML fallback (opens in Excel & LibreOffice Calc)
+      let xml = `<?xml version="1.0" encoding="UTF-8"?>\n<?mso-application progid="Excel.Sheet"?>\n`;
+      xml += `<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"\n`;
+      xml += ` xmlns:o="urn:schemas-microsoft-com:office:office"\n`;
+      xml += ` xmlns:x="urn:schemas-microsoft-com:office:excel"\n`;
+      xml += ` xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">\n`;
+      xml += ` <Styles>\n`;
+      xml += `  <Style ss:ID="Header"><Font ss:Bold="1" ss:Color="#FFFFFF"/><Interior ss:Color="#001489" ss:Pattern="Solid"/><Alignment ss:Horizontal="Center"/></Style>\n`;
+      xml += `  <Style ss:ID="RedBold"><Font ss:Bold="1" ss:Color="#D60000"/><Alignment ss:Horizontal="Left"/></Style>\n`;
+      xml += `  <Style ss:ID="Normal"><Alignment ss:Horizontal="Left"/></Style>\n`;
+      xml += ` </Styles>\n`;
+      xml += ` <Worksheet ss:Name="BOM">\n  <Table>\n`;
+      xml += `   <Row ss:StyleID="Header">\n`;
+      columns.forEach(c => {
+        xml += `    <Cell><Data ss:Type="String">${escapeHtml(formatColumnHeader(c))}</Data></Cell>\n`;
+      });
+      xml += `   </Row>\n`;
+
+      rows.forEach(r => {
+        xml += `   <Row>\n`;
+        columns.forEach((c) => {
+          const val = r[c] !== undefined && r[c] !== null ? String(r[c]) : '';
+          const isRed = isPartNumberCol(c) || isQuantityCol(c);
+          const style = isRed ? ` ss:StyleID="RedBold"` : ` ss:StyleID="Normal"`;
+          xml += `    <Cell${style}><Data ss:Type="String">${escapeHtml(val)}</Data></Cell>\n`;
+        });
+        xml += `   </Row>\n`;
+      });
+      xml += `  </Table>\n </Worksheet>\n</Workbook>`;
+
+      const blob = new Blob([xml], { type: 'application/vnd.ms-excel;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = format === 'ods' ? `BOM_${kit.asset}_${kit.kit}.xml` : `BOM_${kit.asset}_${kit.kit}.xls`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(url), 2000);
+      showToast(`Exported BOM spreadsheet (${format.toUpperCase()})`);
+    }
+
+    function renderBOMComponent(kit, container, onCloseCallback) {
+      if (!container) return;
+
+      const bomInfo = parseBOMData(kit.bom);
+      if (!kit.bom || bomInfo.rows.length === 0) {
+        container.innerHTML = `
+          <div class="bom-empty-box">
+            <div style="font-weight:bold; font-size:0.95em; margin-bottom:4px; display:flex; align-items:center; gap:6px;">
+              <span>⚠️</span> No BOM Uploaded for Kit #${escapeHtml(kit.kit)}
+            </div>
+            <div style="line-height:1.4;">
+              A Bill of Materials (BOM) has not been uploaded for this kit yet. Admins can upload a JSON BOM file anytime in the <strong>Admin Console &gt; 2. Edit Part #</strong> tab.
+            </div>
+            <div style="margin-top:10px; display:flex; gap:8px;">
+              <button type="button" class="btn-edit-part" id="inlineOpenEditBomBtn">
+                Upload in Admin Console
+              </button>
+              <button type="button" class="btn-cancel" id="inlineCloseBomEmptyBtn">
+                Close
+              </button>
+            </div>
+          </div>
+        `;
+
+        const uploadBtn = container.querySelector('#inlineOpenEditBomBtn');
+        if (uploadBtn) {
+          uploadBtn.addEventListener('click', () => {
+            if (onCloseCallback) onCloseCallback();
+            if (isAuthenticated) {
+              openAdminHub('edit', kit);
+            } else {
+              requireAuth(() => {
+                openAdminHub('edit', kit);
+              });
+            }
+          });
+        }
+
+        const closeBtn = container.querySelector('#inlineCloseBomEmptyBtn');
+        if (closeBtn) {
+          closeBtn.addEventListener('click', () => {
+            if (onCloseCallback) onCloseCallback();
+          });
+        }
+        return;
+      }
+
+      let currentView = 'table';
+      let currentFilter = '';
+
+      function redraw() {
+        const { metadata, columns, rows, rawJsonStr } = bomInfo;
+        const q = currentFilter.trim().toLowerCase();
+        const filteredRows = q
+          ? rows.filter(r => Object.values(r).some(val => String(val).toLowerCase().includes(q)))
+          : rows;
+
+        let metaHtml = '';
+        if (Object.keys(metadata).length > 0) {
+          metaHtml = `
+            <div style="background:#f8fafc; border-bottom:1px solid #e2e8f0; padding:4px 12px; display:flex; flex-wrap:wrap; gap:6px; font-size:0.72em; color:#475569;">
+              ${Object.entries(metadata).map(([k, v]) => `
+                <span style="background:#fff; border:1px solid #cbd5e1; padding:1px 6px; border-radius:4px;">
+                  <strong style="color:#0f172a;">${escapeHtml(formatColumnHeader(k))}:</strong> ${escapeHtml(String(v))}
+                </span>
+              `).join('')}
+            </div>
+          `;
+        }
+
+        container.innerHTML = `
+          <div class="bom-header">
+            <div class="bom-title-group">
+              <span style="font-size:1.1em;">&#128203;</span>
+              <div>
+                <h4 class="bom-title">
+                  Bill of Materials (BOM)
+                  <span class="bom-badge-count">${rows.length} Parts</span>
+                </h4>
+                <div class="bom-subtext">Tool: ${escapeHtml(kit.asset)} &bull; Kit #${escapeHtml(kit.kit)}</div>
+              </div>
+            </div>
+            <div class="bom-actions">
+              <button type="button" class="bom-btn-sm" id="bomExportXlsxBtn" title="Download whole BOM table as Excel (.xlsx)" style="background:#00875a; border-color:#00875a; font-weight:bold;">
+                &#128202; XLSX
+              </button>
+              <button type="button" class="bom-btn-sm" id="bomExportOdsBtn" title="Download whole BOM table as OpenDocument Spreadsheet (.ods)" style="background:#0284c7; border-color:#0284c7; font-weight:bold;">
+                &#128196; ODS
+              </button>
+              <button type="button" class="bom-btn-sm" id="bomToggleViewBtn" title="Toggle Table / JSON view">
+                ${currentView === 'table' ? '&#128196; JSON' : '&#128202; Table'}
+              </button>
+              <button type="button" class="bom-btn-sm" id="bomExportJsonBtn" title="Export BOM JSON file">
+                &#128229; JSON
+              </button>
+              <button type="button" class="bom-btn-close" id="bomCloseHeaderBtn" title="Close BOM Table">&times;</button>
+            </div>
+          </div>
+
+          ${metaHtml}
+
+          ${currentView === 'table' ? `
+            <div class="bom-search-bar">
+              <input
+                type="text"
+                class="bom-search-input"
+                id="bomSearchFilterInput"
+                placeholder="Filter by part number, description, item..."
+                value="${escapeHtml(currentFilter)}"
+              />
+              ${currentFilter ? '<button type="button" class="bom-btn-sm" id="bomClearFilterBtn" style="color:#333; background:#e2e8f0;">Clear</button>' : ''}
+              <span style="font-size:0.72em; color:#64748b; font-family:monospace; white-space:nowrap;">
+                Showing ${filteredRows.length} of ${rows.length}
+              </span>
+            </div>
+
+            <div class="bom-table-scroll">
+              <table class="bom-table">
+                <thead>
+                  <tr>
+                    ${columns.map(c => {
+                      const isDesc = isDescriptionCol(c);
+                      const isQty = isQuantityCol(c);
+                      const thCls = isDesc ? 'th-desc' : isQty ? 'th-qty' : '';
+                      return `<th class="${thCls}">${escapeHtml(formatColumnHeader(c))}</th>`;
+                    }).join('')}
+                    <th style="text-align:right; width:65px;">Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${filteredRows.length === 0 ? `
+                    <tr>
+                      <td colspan="${columns.length + 1}" style="text-align:center; padding:18px; color:#94a3b8;">
+                        No matching parts found for "${escapeHtml(currentFilter)}"
+                      </td>
+                    </tr>
+                  ` : filteredRows.map(r => {
+                    const pnCol = columns.find(isPartNumberCol) || 'partNumber';
+                    const pnVal = r[pnCol] ? String(r[pnCol]) : '';
+                    return `
+                      <tr>
+                        ${columns.map(c => {
+                          const val = r[c] !== undefined && r[c] !== null ? String(r[c]) : '-';
+                          const isPn = isPartNumberCol(c);
+                          const isDesc = isDescriptionCol(c);
+                          const isQty = isQuantityCol(c);
+                          if (isDesc) {
+                            return `<td class="col-desc" title="${escapeHtml(val)}">${escapeHtml(val)}</td>`;
+                          }
+                          const cls = isPn ? 'col-partnum' : isQty ? 'col-qty' : '';
+                          return `<td class="${cls}">${escapeHtml(val)}</td>`;
+                        }).join('')}
+                        <td style="text-align:right;">
+                          ${pnVal ? `
+                            <button type="button" class="bom-copy-pn-btn" data-pn="${escapeHtml(pnVal)}" title="Copy Part #${escapeHtml(pnVal)}">
+                              Copy
+                            </button>
+                          ` : ''}
+                        </td>
+                      </tr>
+                    `;
+                  }).join('')}
+                </tbody>
+              </table>
+            </div>
+          ` : `
+            <div style="position:relative;">
+              <div style="padding:6px 12px; background:#2d2d2d; display:flex; justify-content:flex-end;">
+                <button type="button" class="bom-btn-sm" id="bomCopyJsonBtn">
+                  Copy Full JSON
+                </button>
+              </div>
+              <pre class="bom-raw-json">${escapeHtml(rawJsonStr)}</pre>
+            </div>
+          `}
+
+          <div style="background:#f8fafc; padding:6px 12px; border-top:1px solid #e2e8f0; display:flex; justify-content:space-between; align-items:center; font-size:0.72em; color:#64748b;">
+            <span>Tool: <strong>${escapeHtml(kit.asset)}</strong> &bull; Kit #${escapeHtml(kit.kit)}</span>
+            <span style="text-decoration:underline; cursor:pointer;" id="bomFooterCloseBtn">Hide Table</span>
+          </div>
+        `;
+
+        const exportXlsxBtn = container.querySelector('#bomExportXlsxBtn');
+        if (exportXlsxBtn) {
+          exportXlsxBtn.addEventListener('click', () => {
+            exportBOMSpreadsheet(kit, bomInfo, 'xlsx');
+          });
+        }
+
+        const exportOdsBtn = container.querySelector('#bomExportOdsBtn');
+        if (exportOdsBtn) {
+          exportOdsBtn.addEventListener('click', () => {
+            exportBOMSpreadsheet(kit, bomInfo, 'ods');
+          });
+        }
+
+        const toggleBtn = container.querySelector('#bomToggleViewBtn');
+        if (toggleBtn) {
+          toggleBtn.addEventListener('click', () => {
+            currentView = currentView === 'table' ? 'json' : 'table';
+            redraw();
+          });
+        }
+
+        const exportJsonBtn = container.querySelector('#bomExportJsonBtn');
+        if (exportJsonBtn) {
+          exportJsonBtn.addEventListener('click', () => {
+            const blob = new Blob([rawJsonStr], { type: 'application/json;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `BOM_${kit.asset}_${kit.kit}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            setTimeout(() => URL.revokeObjectURL(url), 2000);
+            showToast(`Exported BOM_${kit.asset}_${kit.kit}.json`);
+          });
+        }
+
+        const closeHBtn = container.querySelector('#bomCloseHeaderBtn');
+        if (closeHBtn) {
+          closeHBtn.addEventListener('click', () => {
+            if (onCloseCallback) onCloseCallback();
+          });
+        }
+
+        const closeFBtn = container.querySelector('#bomFooterCloseBtn');
+        if (closeFBtn) {
+          closeFBtn.addEventListener('click', () => {
+            if (onCloseCallback) onCloseCallback();
+          });
+        }
+
+        const searchInp = container.querySelector('#bomSearchFilterInput');
+        if (searchInp) {
+          searchInp.addEventListener('input', (e) => {
+            currentFilter = e.target.value;
+            redraw();
+            const reFocus = container.querySelector('#bomSearchFilterInput');
+            if (reFocus) {
+              reFocus.focus();
+              reFocus.setSelectionRange(currentFilter.length, currentFilter.length);
+            }
+          });
+        }
+
+        const clearBtn = container.querySelector('#bomClearFilterBtn');
+        if (clearBtn) {
+          clearBtn.addEventListener('click', () => {
+            currentFilter = '';
+            redraw();
+          });
+        }
+
+        const copyJsonBtn = container.querySelector('#bomCopyJsonBtn');
+        if (copyJsonBtn) {
+          copyJsonBtn.addEventListener('click', () => {
+            copyTextToClipboard(rawJsonStr);
+            copyJsonBtn.textContent = 'Copied JSON!';
+            setTimeout(() => { copyJsonBtn.textContent = 'Copy Full JSON'; }, 1500);
+          });
+        }
+
+        const copyPnBtns = container.querySelectorAll('.bom-copy-pn-btn');
+        copyPnBtns.forEach(btn => {
+          btn.addEventListener('click', () => {
+            const val = btn.getAttribute('data-pn');
+            if (val) {
+              copyTextToClipboard(val);
+              btn.textContent = 'Copied!';
+              btn.style.background = '#00875a';
+              btn.style.color = '#fff';
+              setTimeout(() => {
+                btn.textContent = 'Copy';
+                btn.style.background = '';
+                btn.style.color = '';
+              }, 1200);
+            }
+          });
+        });
+      }
+
+      redraw();
+    }
+
     function renderResult() {
       if (!resultEl) return;
       resultEl.innerHTML = '';
@@ -1912,30 +3272,67 @@
 
       // Completely native presentation - no 'Custom' label
       resultEl.innerHTML = `
-        <div class="asset-name">${found.asset}</div>
-        <div class="kit-part-number" id="displayKitNum">${found.kit}</div>
+        <div class="asset-name">${escapeHtml(found.asset)}</div>
+        <div class="kit-part-number" id="displayKitNum">${escapeHtml(found.kit)}</div>
         <div class="action-btn-row">
           <button type="button" class="copy-btn" id="copyResultBtn">Copy Part Number</button>
+          <button type="button" class="btn-bom ${found.bom ? 'has-bom' : ''}" id="bomResultBtn" title="${found.bom ? "View this kit's Bill of Materials table" : 'View or upload BOM'}">
+            <span>&#128203;</span> BOM ${found.bom ? '<span class="bom-dot"></span>' : ''}
+          </button>
           <button type="button" class="btn-edit-part" id="editResultBtn">Edit Part #</button>
           <button type="button" class="btn-del-part" id="deleteResultBtn">Delete</button>
+        </div>
+        <div id="bomTableContainer" class="bom-table-container" style="display:none;"></div>
+        <!-- Bottom Row: Search Bar on left + "Check QTY in BlueMM" button on right -->
+        <div class="bluemm-search-bottom-row" id="blueMmSearchBottomRow">
+          <div class="bluemm-bar-controls">
+            <div class="bluemm-search-box">
+              <span class="bluemm-search-icon">&#128269;</span>
+              <input
+                type="text"
+                id="blueMmPartSearchInput"
+                class="bluemm-search-input"
+                placeholder="Enter Part # to find Kit(s) & QTY across all tools..."
+              />
+              <button type="button" id="blueMmClearSearchBtn" class="bluemm-clear-btn" style="display:none;" title="Clear search">&times;</button>
+            </div>
+            <button type="button" id="checkQtyBlueMmBtn" class="btn-bluemm-action" title="Open BlueMM (https://bluemm.slb.com) to check stock">
+              <span>Check QTY in BlueMM</span>
+              <span style="font-size:1.1em;">&#8599;</span>
+            </button>
+          </div>
+          <div id="blueMmSearchResultsContainer" style="display:none;"></div>
         </div>
       `;
 
       const copyBtn = document.getElementById('copyResultBtn');
       if (copyBtn) {
         copyBtn.addEventListener('click', () => {
-          try {
-            navigator.clipboard.writeText(found.kit);
-          } catch (e) {
-            const temp = document.createElement('textarea');
-            temp.value = found.kit;
-            document.body.appendChild(temp);
-            temp.select();
-            document.execCommand('copy');
-            document.body.removeChild(temp);
-          }
+          copyTextToClipboard(found.kit);
           copyBtn.textContent = 'Copied!';
           setTimeout(() => { copyBtn.textContent = 'Copy Part Number'; }, 1500);
+        });
+      }
+
+      const bomBtn = document.getElementById('bomResultBtn');
+      const bomContainer = document.getElementById('bomTableContainer');
+      let isBomTableOpen = false;
+
+      if (bomBtn && bomContainer) {
+        bomBtn.addEventListener('click', () => {
+          isBomTableOpen = !isBomTableOpen;
+          if (isBomTableOpen) {
+            bomBtn.classList.add('active');
+            bomContainer.style.display = 'block';
+            renderBOMComponent(found, bomContainer, () => {
+              isBomTableOpen = false;
+              bomBtn.classList.remove('active');
+              bomContainer.style.display = 'none';
+            });
+          } else {
+            bomBtn.classList.remove('active');
+            bomContainer.style.display = 'none';
+          }
         });
       }
 
@@ -1962,6 +3359,205 @@
               promptDeleteKit(found);
             });
           }
+        });
+      }
+
+      // Check QTY in BlueMM button
+      const blueMmBtn = document.getElementById('checkQtyBlueMmBtn');
+      if (blueMmBtn) {
+        blueMmBtn.addEventListener('click', () => {
+          window.open('https://bluemm.slb.com', '_blank');
+          showToast('Opening BlueMM (https://bluemm.slb.com)...');
+        });
+      }
+
+      // Reverse Part Number Search in all kit BOMs & data
+      const searchInp = document.getElementById('blueMmPartSearchInput');
+      const clearSearchBtn = document.getElementById('blueMmClearSearchBtn');
+      const resultsContainer = document.getElementById('blueMmSearchResultsContainer');
+
+      function doPartSearch() {
+        if (!searchInp || !resultsContainer) return;
+        const q = searchInp.value.trim().toLowerCase();
+
+        if (clearSearchBtn) {
+          clearSearchBtn.style.display = q ? 'block' : 'none';
+        }
+
+        if (!q) {
+          resultsContainer.style.display = 'none';
+          resultsContainer.innerHTML = '';
+          return;
+        }
+
+        resultsContainer.style.display = 'block';
+
+        const results = [];
+        const seenKeys = new Set();
+
+        for (const kit of kitData) {
+          if (!kit) continue;
+
+          // 1. Search inside BOM
+          if (kit.bom) {
+            try {
+              const { columns, rows } = parseBOMData(kit.bom);
+              const partCol = columns.find(isPartNumberCol) || 'partNumber';
+              const qtyCol = columns.find(isQuantityCol) || 'qty';
+              const descCol = columns.find(isDescriptionCol) || 'description';
+
+              for (const row of rows) {
+                const pnVal = row[partCol] !== undefined && row[partCol] !== null ? String(row[partCol]).trim() : '';
+                const descVal = row[descCol] !== undefined && row[descCol] !== null ? String(row[descCol]).trim() : '';
+                const qtyVal = row[qtyCol] !== undefined && row[qtyCol] !== null ? String(row[qtyCol]).trim() : '1';
+
+                if (pnVal && pnVal.toLowerCase().includes(q)) {
+                  const key = `${kit.id || kit.kit}_bom_${pnVal}`;
+                  if (!seenKeys.has(key)) {
+                    seenKeys.add(key);
+                    results.push({
+                      kit: kit.kit,
+                      asset: kit.asset,
+                      family: kit.family,
+                      maintenance: kit.maintenance,
+                      level: kit.level,
+                      partNumber: pnVal,
+                      description: descVal,
+                      quantity: qtyVal,
+                      rawKit: kit
+                    });
+                  }
+                }
+              }
+            } catch (e) {}
+          }
+
+          // 2. Search if kit itself matches query
+          if (kit.kit && String(kit.kit).toLowerCase().includes(q)) {
+            const key = `${kit.id || kit.kit}_kit_${kit.kit}`;
+            if (!seenKeys.has(key)) {
+              seenKeys.add(key);
+              results.push({
+                kit: kit.kit,
+                asset: kit.asset,
+                family: kit.family,
+                maintenance: kit.maintenance,
+                level: kit.level,
+                partNumber: kit.kit,
+                description: `Kit for ${kit.asset} (${kit.maintenance} Level ${kit.level})`,
+                quantity: '1 Kit',
+                rawKit: kit
+              });
+            }
+          }
+        }
+
+        if (results.length === 0) {
+          resultsContainer.innerHTML = `
+            <div class="bluemm-results-card" style="text-align:center; padding:12px; font-size:0.8em; color:#64748b;">
+              No kit found containing part <strong style="color:#0f172a; font-family:monospace;">"${escapeHtml(q)}"</strong>.
+              <div style="margin-top:6px;">
+                <button type="button" id="inlineVerifyBlueMmBtn" style="background:none; border:none; color:#001489; font-weight:bold; cursor:pointer; text-decoration:underline;">
+                  Verify part availability directly in BlueMM &#8599;
+                </button>
+              </div>
+            </div>
+          `;
+          const verifyBtn = resultsContainer.querySelector('#inlineVerifyBlueMmBtn');
+          if (verifyBtn) {
+            verifyBtn.addEventListener('click', () => {
+              window.open('https://bluemm.slb.com', '_blank');
+            });
+          }
+        } else {
+          resultsContainer.innerHTML = `
+            <div class="bluemm-results-card">
+              <div class="bluemm-results-header">
+                <span>Search results for part #${escapeHtml(q)}: <span style="color:#001489; font-family:monospace;">${results.length} ${results.length === 1 ? 'kit found' : 'kits found'}</span></span>
+                <span style="font-size:0.9em; color:#64748b; cursor:pointer; text-decoration:underline;" id="dismissSearchResultsBtn">Dismiss</span>
+              </div>
+              <div style="max-height:280px; overflow-y:auto; padding-right:2px;">
+                ${results.map(r => `
+                  <div class="bluemm-result-item">
+                    <div style="flex:1; min-width:200px;">
+                      <div style="display:flex; flex-wrap:wrap; gap:8px; align-items:center;">
+                        <span style="font-size:0.7em; text-transform:uppercase; color:#64748b; font-weight:700;">Kit Part #:</span>
+                        <span class="bluemm-result-pn">${escapeHtml(r.kit)}</span>
+                        <span style="color:#cbd5e1;">&bull;</span>
+                        <span style="font-size:0.7em; text-transform:uppercase; color:#64748b; font-weight:700;">QTY in Kit:</span>
+                        <span class="bluemm-result-qty">${escapeHtml(r.quantity)}</span>
+                      </div>
+                      <div style="font-weight:700; font-size:0.82em; color:#0f172a; margin-top:2px;">
+                        ${escapeHtml(r.asset)} <span style="font-weight:normal; font-size:0.85em; color:#64748b;">(${escapeHtml(r.family)} &bull; ${escapeHtml(r.maintenance)} Level ${escapeHtml(r.level)})</span>
+                      </div>
+                      ${r.description ? `
+                        <div style="font-size:0.75em; color:#64748b; margin-top:2px; text-overflow:ellipsis; overflow:hidden; white-space:nowrap;" title="${escapeHtml(r.description)}">
+                          Part: <span style="font-family:monospace; color:#334155;">${escapeHtml(r.partNumber)}</span> &mdash; ${escapeHtml(r.description)}
+                        </div>
+                      ` : ''}
+                    </div>
+                    <div style="display:flex; gap:6px; align-items:center;">
+                      <button type="button" class="bluemm-btn-mini copy-kit-result-btn" data-kit="${escapeHtml(r.kit)}">Copy Kit #</button>
+                      <button type="button" class="bluemm-btn-select select-kit-result-btn" data-family="${escapeHtml(r.family)}" data-asset="${escapeHtml(r.asset)}" data-maint="${escapeHtml(r.maintenance)}" data-lvl="${escapeHtml(r.level)}">View Kit</button>
+                    </div>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          `;
+
+          const dismissBtn = resultsContainer.querySelector('#dismissSearchResultsBtn');
+          if (dismissBtn) {
+            dismissBtn.addEventListener('click', () => {
+              if (searchInp) searchInp.value = '';
+              doPartSearch();
+            });
+          }
+
+          const copyKitBtns = resultsContainer.querySelectorAll('.copy-kit-result-btn');
+          copyKitBtns.forEach(b => {
+            b.addEventListener('click', () => {
+              const kitNum = b.getAttribute('data-kit');
+              if (kitNum) {
+                copyTextToClipboard(kitNum);
+                b.textContent = 'Copied!';
+                setTimeout(() => { b.textContent = 'Copy Kit #'; }, 1500);
+              }
+            });
+          });
+
+          const selectKitBtns = resultsContainer.querySelectorAll('.select-kit-result-btn');
+          selectKitBtns.forEach(b => {
+            b.addEventListener('click', () => {
+              const fam = b.getAttribute('data-family');
+              const ast = b.getAttribute('data-asset');
+              const mnt = b.getAttribute('data-maint');
+              const lvl = b.getAttribute('data-lvl');
+              if (familyEl && assetEl && maintenanceEl && levelEl) {
+                familyEl.value = fam;
+                updateAssets();
+                assetEl.value = ast;
+                updateMaintenances();
+                maintenanceEl.value = mnt;
+                updateLevels();
+                levelEl.value = lvl;
+                renderResult();
+                const newBomBtn = document.getElementById('bomResultBtn');
+                if (newBomBtn) newBomBtn.click();
+              }
+            });
+          });
+        }
+      }
+
+      if (searchInp) {
+        searchInp.addEventListener('input', doPartSearch);
+      }
+
+      if (clearSearchBtn) {
+        clearSearchBtn.addEventListener('click', () => {
+          if (searchInp) searchInp.value = '';
+          doPartSearch();
         });
       }
     }
@@ -2309,10 +3905,116 @@
       }
       if (editPartNumberInput) editPartNumberInput.value = tool.kit;
       if (editNotesInput) editNotesInput.value = tool.notes || '';
+
+      // Update BOM status badge and preview state
+      if (editBomStatusBadge) {
+        if (tool.bom) {
+          const parsed = parseBOMData(tool.bom);
+          editBomStatusBadge.className = 'badge-bom-attached';
+          editBomStatusBadge.textContent = `BOM Attached (${parsed.rows.length} parts)`;
+          if (editPreviewBomBtn) editPreviewBomBtn.style.display = 'inline-flex';
+          if (editRemoveBomBtn) editRemoveBomBtn.style.display = 'inline-flex';
+        } else {
+          editBomStatusBadge.className = 'badge-bom-none';
+          editBomStatusBadge.textContent = 'No BOM Attached';
+          if (editPreviewBomBtn) editPreviewBomBtn.style.display = 'none';
+          if (editRemoveBomBtn) editRemoveBomBtn.style.display = 'none';
+        }
+      }
+      if (editBomError) editBomError.style.display = 'none';
+      if (editBomPreviewArea) {
+        editBomPreviewArea.style.display = 'none';
+        editBomPreviewArea.innerHTML = '';
+      }
+
       if (editToolFormArea) editToolFormArea.style.display = 'block';
       setTimeout(() => {
         if (editPartNumberInput) editPartNumberInput.focus();
       }, 50);
+    }
+
+    // Wiring up BOM Upload and Management in Edit Tab
+    if (editUploadBomBtn && editBomFileInput) {
+      editUploadBomBtn.addEventListener('click', () => {
+        editBomFileInput.click();
+      });
+
+      editBomFileInput.addEventListener('change', (e) => {
+        const file = e.target.files ? e.target.files[0] : null;
+        if (!file || !currentToolToEdit) return;
+
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          try {
+            const text = event.target.result;
+            const parsed = JSON.parse(text);
+            currentToolToEdit.bom = parsed;
+
+            const bomInfo = parseBOMData(parsed);
+            if (editBomStatusBadge) {
+              editBomStatusBadge.className = 'badge-bom-attached';
+              editBomStatusBadge.textContent = `BOM Attached (${bomInfo.rows.length} parts)`;
+            }
+            if (editPreviewBomBtn) editPreviewBomBtn.style.display = 'inline-flex';
+            if (editRemoveBomBtn) editRemoveBomBtn.style.display = 'inline-flex';
+            if (editBomError) editBomError.style.display = 'none';
+
+            if (editBomPreviewArea) {
+              editBomPreviewArea.style.display = 'block';
+              renderBOMComponent(currentToolToEdit, editBomPreviewArea, () => {
+                editBomPreviewArea.style.display = 'none';
+              });
+            }
+
+            showToast(`Loaded BOM for ${currentToolToEdit.asset} (${bomInfo.rows.length} parts)! Remember to click Save.`);
+          } catch (err) {
+            if (editBomError) {
+              editBomError.textContent = `Invalid JSON file: ${err.message || 'Parse error'}`;
+              editBomError.style.display = 'block';
+            }
+          }
+          editBomFileInput.value = '';
+        };
+
+        reader.onerror = () => {
+          if (editBomError) {
+            editBomError.textContent = 'Failed to read file from disk.';
+            editBomError.style.display = 'block';
+          }
+        };
+
+        reader.readAsText(file);
+      });
+    }
+
+    if (editPreviewBomBtn) {
+      editPreviewBomBtn.addEventListener('click', () => {
+        if (!editBomPreviewArea || !currentToolToEdit) return;
+        if (editBomPreviewArea.style.display === 'none' || !editBomPreviewArea.style.display) {
+          editBomPreviewArea.style.display = 'block';
+          renderBOMComponent(currentToolToEdit, editBomPreviewArea, () => {
+            editBomPreviewArea.style.display = 'none';
+          });
+        } else {
+          editBomPreviewArea.style.display = 'none';
+        }
+      });
+    }
+
+    if (editRemoveBomBtn) {
+      editRemoveBomBtn.addEventListener('click', () => {
+        if (!currentToolToEdit) return;
+        currentToolToEdit.bom = null;
+        if (editBomStatusBadge) {
+          editBomStatusBadge.className = 'badge-bom-none';
+          editBomStatusBadge.textContent = 'No BOM Attached';
+        }
+        if (editPreviewBomBtn) editPreviewBomBtn.style.display = 'none';
+        if (editRemoveBomBtn) editRemoveBomBtn.style.display = 'none';
+        if (editBomPreviewArea) editBomPreviewArea.style.display = 'none';
+        if (editBomError) editBomError.style.display = 'none';
+        showToast('BOM removed from this kit. Remember to click Save.');
+      });
     }
 
     if (cancelEditBtn) {
@@ -2372,6 +4074,12 @@
         const help = clone.querySelector('#helpMessage');
         if (help) help.style.display = 'none';
 
+        // 2b. Reset container to default responsive view
+        const cloneCont = clone.querySelector('.kit-finder-container');
+        if (cloneCont) cloneCont.classList.remove('widescreen-mode');
+        const cloneWidthBtn = clone.querySelector('#widthToggleBtn');
+        if (cloneWidthBtn) cloneWidthBtn.classList.remove('active');
+
         // 3. Reset admin button state to default unauthenticated "Admin" state
         const adminBtn = clone.querySelector('#openAdminBtn');
         if (adminBtn) {
@@ -2416,6 +4124,31 @@
         if (editList) editList.innerHTML = '';
         const manageList = clone.querySelector('#manageToolListBox');
         if (manageList) manageList.innerHTML = '';
+
+        // Reset BOM edit elements in clone
+        const editBomPrev = clone.querySelector('#editBomPreviewArea');
+        if (editBomPrev) {
+          editBomPrev.style.display = 'none';
+          editBomPrev.innerHTML = '';
+        }
+        const editBomErr = clone.querySelector('#editBomError');
+        if (editBomErr) {
+          editBomErr.style.display = 'none';
+          editBomErr.textContent = '';
+        }
+        const editBomFile = clone.querySelector('#editBomFileInput');
+        if (editBomFile) {
+          editBomFile.value = '';
+        }
+        const editBomBadge = clone.querySelector('#editBomStatusBadge');
+        if (editBomBadge) {
+          editBomBadge.className = 'badge-bom-none';
+          editBomBadge.textContent = 'No BOM Attached';
+        }
+        const editPrevBtn = clone.querySelector('#editPreviewBomBtn');
+        if (editPrevBtn) editPrevBtn.style.display = 'none';
+        const editRemBtn = clone.querySelector('#editRemoveBomBtn');
+        if (editRemBtn) editRemBtn.style.display = 'none';
 
         // 7. Reset active tab in admin modal to Tab 1
         const tabBtns = clone.querySelectorAll('.admin-tab-btn');
@@ -2654,6 +4387,5 @@
     updateKitCount();
   })();
   </script>
-
-
-</body></html>
+</body>
+</html>
