@@ -1,9 +1,8 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Sonde SLS Kit Finder</title>
+<html lang="en"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wireline SL Kit Finder</title>
   <script>
     // SharePoint Sandbox Shield: Prevents SecurityError when embedded in sandboxed srcdoc iframes
     (function() {
@@ -118,8 +117,13 @@
     }
 
     .btn-admin.authed {
-      background: #15803d;
-      border-color: #15803d;
+      background: #d97706;
+      border-color: #b45309;
+      color: #fff;
+    }
+
+    .btn-admin.authed:hover {
+      background: #b45309;
     }
 
     .btn-help {
@@ -304,7 +308,7 @@
     }
 
     .modal-overlay.active {
-      display: flex;
+      display: flex !important;
     }
 
     .modal-card {
@@ -426,6 +430,69 @@
       font-weight: 500;
     }
 
+    .btn-download-sharepoint {
+      padding: 6px 12px;
+      font-size: 0.8em;
+      font-weight: bold;
+      background: #001489;
+      color: #fff;
+      border: 1px solid #000f6b;
+      border-radius: 6px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: background 0.15s ease;
+    }
+
+    .btn-download-sharepoint:hover {
+      background: #000f6b;
+    }
+
+    .sharepoint-sync-box {
+      background: #eef5ff;
+      border: 1.5px solid #bcd8ff;
+      border-radius: 8px;
+      padding: 10px 14px;
+      margin-bottom: 14px;
+    }
+
+    .btn-sync-action {
+      padding: 6px 12px;
+      font-size: 0.78em;
+      font-weight: bold;
+      background: #001489;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 0.15s ease;
+    }
+
+    .btn-sync-action:hover {
+      background: #000f6b;
+    }
+
+    .btn-save-download {
+      background: #00875a;
+      color: #fff;
+      border: none;
+      padding: 9px 15px;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 0.85em;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition: background 0.15s ease;
+    }
+
+    .btn-save-download:hover {
+      background: #006644;
+    }
+
     .alert-box {
       padding: 10px 14px;
       border-radius: 8px;
@@ -506,11 +573,10 @@
 <body>
 
   <!-- Toast Element -->
-  <div id="toast" class="toast-box"></div>
+  <div id="toast" class="toast-box" style="display: block;">Admin access granted.</div>
 
   <div class="kit-finder-container">
     <div class="header-bar">
-      <!-- SLB Logo -->
       <img
         class="slb-logo"
         src="Logo.png"
@@ -519,9 +585,9 @@
       />
 
       <div class="header-actions">
-        <!-- Admin Console Button -->
-        <button type="button" class="btn-admin" id="openAdminBtn">
-          <span>&#128274;</span> <span id="adminBtnText">Admin</span>
+        <!-- Admin Console / Lock Button -->
+        <button type="button" class="btn-admin" id="openAdminBtn" title="Admin Console (Click to unlock)">
+          <span>🔒</span> <span id="adminBtnText">Admin</span>
         </button>
         <!-- Help Button -->
         <button type="button" class="btn-help" id="helpBtn">Help</button>
@@ -529,35 +595,30 @@
     </div>
 
     <!-- On-page help message -->
-    <div id="helpMessage" class="help-message">
+    <div id="helpMessage" class="help-message" style="display: none;">
       For help, correction, or addition of newly released kits please send a message to <a href="mailto:rsuruelos@slb.com">rsuruelos@slb.com</a>
     </div>
 
-    <div class="title">Sonde SLS Kit Finder</div>
+    <div class="title">Wireline SL Kit Finder</div>
 
     <label for="family">Family:</label>
-    <select id="family">
-      <option value="">Select Family</option>
-    </select>
+    <select id="family"><option value="" selected="">Select Family</option></select>
 
     <label for="asset">Asset Name:</label>
-    <select id="asset" disabled>
-      <option value="">Select Asset</option>
-    </select>
+    <select id="asset" disabled=""><option value="" selected="">Select Asset</option></select>
 
     <label for="maintenance">Maintenance Type:</label>
-    <select id="maintenance" disabled>
-      <option value="">Select Maintenance Type</option>
-    </select>
+    <select id="maintenance" disabled=""><option value="" selected="">Select Maintenance Type</option></select>
 
     <label for="level">Level:</label>
-    <select id="level" disabled>
-      <option value="">Select Level</option>
-    </select>
+    <select id="level" disabled=""><option value="" selected="">Select Level</option></select>
 
     <div id="result" class="result">
-      <div style="color: #888; font-size: 0.9em;">Select Family, Asset, Maintenance Type, and Level</div>
-    </div>
+            <div class="result-placeholder">
+              <div style="font-size: 2em; margin-bottom: 8px; opacity: 0.7;">🔍</div>
+              <div>Select a Sonde tool to view maintenance kits</div>
+            </div>
+          </div>
 
     <div class="footer-bar">
       <span id="kitCount">Total Kits: 110</span>
@@ -568,11 +629,11 @@
   <!-- ======================================================== -->
   <!-- 1. IN-PAGE ADMIN PASSWORD MODAL (No window.prompt!)      -->
   <!-- ======================================================== -->
-  <div id="authModal" class="modal-overlay">
+  <div id="authModal" class="modal-overlay" style="display: none;">
     <div class="modal-card" style="max-width: 400px;">
       <div class="modal-header">
         <h3>Admin Authorization</h3>
-        <button type="button" class="modal-close" id="closeAuthModalBtn">&times;</button>
+        <button type="button" class="modal-close" id="closeAuthModalBtn">×</button>
       </div>
 
       <div class="alert-info" style="margin-bottom:12px;">
@@ -583,35 +644,52 @@
         Incorrect password. Access denied.
       </div>
 
-      <form id="authForm">
+      <div id="authFormArea">
         <div class="form-group">
           <label for="authPassword">Password</label>
-          <input
-            type="password"
-            id="authPassword"
-            placeholder="Enter password..."
-            style="font-size: 1.1em; letter-spacing: 2px;"
-            autocomplete="current-password"
-            required
-          />
+          <input type="password" id="authPassword" placeholder="Enter password..." style="font-size: 1.1em; letter-spacing: 2px;" autocomplete="current-password" required="">
         </div>
 
         <div class="form-actions">
           <button type="button" class="btn-cancel" id="cancelAuthBtn">Cancel</button>
-          <button type="submit" class="btn-save">Unlock</button>
+          <button type="button" class="btn-save" id="authSubmitBtn">Unlock</button>
         </div>
-      </form>
+      </div>
     </div>
   </div>
 
   <!-- ======================================================== -->
   <!-- 2. IN-PAGE ADMIN HUB MODAL (Tabs: Add, Edit, Delete)     -->
   <!-- ======================================================== -->
-  <div id="adminHubModal" class="modal-overlay">
-    <div class="modal-card" style="max-width: 560px;">
+  <div id="adminHubModal" class="modal-overlay" style="display: none;">
+    <div class="modal-card" style="max-width: 580px;">
       <div class="modal-header">
-        <h3>Admin Console (Authorized)</h3>
-        <button type="button" class="modal-close" id="closeAdminHubBtn">&times;</button>
+        <div>
+          <h3 style="margin: 0; font-size: 1.2em;">Admin Console (Authorized)</h3>
+          <div style="font-size: 0.75em; color: #666; margin-top: 2px;">Wireline SL Kit Database Management</div>
+        </div>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <button type="button" id="adminDownloadHtmlBtn" class="btn-download-sharepoint" title="Download updated HTML file to overwrite file in SharePoint">📥 Download for SharePoint</button>
+          <button type="button" id="lockAdminModalBtn" style="padding:5px 10px; font-size:0.8em; font-weight:bold; background:#fff3cd; color:#856404; border:1px solid #ffeeba; border-radius:6px; cursor:pointer;" title="Lock Admin mode and secure file">🔒 Lock</button>
+          <button type="button" class="modal-close" id="closeAdminHubBtn">×</button>
+        </div>
+      </div>
+
+      <!-- SharePoint Sync Notice Banner -->
+      <div class="sharepoint-sync-box">
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap;">
+          <div style="flex: 1; min-width: 240px;">
+            <div style="font-weight: bold; font-size: 0.85em; color: #002b66; display: flex; align-items: center; gap: 5px;">
+              <span>💾</span> SharePoint File Overwrite
+            </div>
+            <div style="font-size: 0.78em; color: #33547a; margin-top: 2px; line-height: 1.35;">
+              Edits made here are saved locally. After editing, download the updated HTML file below and drag &amp; drop it into SharePoint to update it for all users.
+            </div>
+          </div>
+          <button type="button" id="bannerDownloadHtmlBtn" class="btn-sync-action">
+            📥 Download Updated HTML
+          </button>
+        </div>
       </div>
 
       <!-- Tab Buttons -->
@@ -626,16 +704,13 @@
         <form id="addKitForm">
           <div class="form-group">
             <label for="mFamilySelect">Family *</label>
-            <select id="mFamilySelect">
-              <option value="">-- Choose Existing Family --</option>
-              <option value="__custom__">+ Add New Family Name...</option>
-            </select>
-            <input type="text" id="mFamilyCustom" placeholder="Enter new family name" style="display:none; margin-top:6px;" />
+            <select id="mFamilySelect"><option value="">-- Choose Existing Family --</option><option value="Caliper TOOLS">Caliper TOOLS</option><option value="FSI">FSI</option><option value="Imaging TOOLS">Imaging TOOLS</option><option value="MaxTRAC">MaxTRAC</option><option value="Release Device">Release Device</option><option value="SONDE Oils">SONDE Oils</option><option value="SPEAR/TTiX">SPEAR/TTiX</option><option value="Seismic TOOLS">Seismic TOOLS</option><option value="Sonic TOOLS">Sonic TOOLS</option><option value="Swivel Heads - ES">Swivel Heads - ES</option><option value="Swivel Heads - PS">Swivel Heads - PS</option><option value="ThruBIT">ThruBIT</option><option value="Tubing Cutter/Resolve iX">Tubing Cutter/Resolve iX</option><option value="TuffTRAC">TuffTRAC</option><option value="__custom__">+ Add New Family Name...</option></select>
+            <input type="text" id="mFamilyCustom" placeholder="Enter new family name" style="display: none; margin-top: 6px;">
           </div>
 
           <div class="form-group">
             <label for="mAsset">Asset Name *</label>
-            <input type="text" id="mAsset" placeholder="e.g. SPDRS-BA or MAMS-CA" required />
+            <input type="text" id="mAsset" placeholder="e.g. SPDRS-BA or MAMS-CA" required="">
           </div>
 
           <div class="form-group" style="display:flex; gap:10px;">
@@ -648,7 +723,7 @@
                 <option value="Redress">Redress</option>
                 <option value="Custom">Custom...</option>
               </select>
-              <input type="text" id="mMaintenanceCustom" placeholder="Custom maint type" style="display:none; margin-top:6px;" />
+              <input type="text" id="mMaintenanceCustom" placeholder="Custom maint type" style="display:none; margin-top:6px;">
             </div>
 
             <div style="flex:1;">
@@ -661,23 +736,24 @@
                 <option value="5">Level 5</option>
                 <option value="Custom">Custom...</option>
               </select>
-              <input type="text" id="mLevelCustom" placeholder="Custom level" style="display:none; margin-top:6px;" />
+              <input type="text" id="mLevelCustom" placeholder="Custom level" style="display:none; margin-top:6px;">
             </div>
           </div>
 
           <div class="form-group">
             <label for="mKit">Kit Part Number *</label>
-            <input type="text" id="mKit" placeholder="e.g. 102057866" required style="font-weight:bold; color:#d60000; font-family:monospace;" />
+            <input type="text" id="mKit" placeholder="e.g. 102057866" required="" style="font-weight:bold; color:#d60000; font-family:monospace;">
           </div>
 
           <div class="form-group">
             <label for="mNotes">Notes / Description (Optional)</label>
-            <input type="text" id="mNotes" placeholder="e.g. Low temp variant, O-rings included" />
+            <input type="text" id="mNotes" placeholder="e.g. Low temp variant, O-rings included">
           </div>
 
           <div class="form-actions">
-            <button type="button" class="btn-cancel" id="cancelAddBtn">Cancel</button>
-            <button type="submit" class="btn-save">Save Kit</button>
+            <button type="button" class="btn-cancel" id="cancelAddBtn">Close</button>
+            <button type="submit" class="btn-save" id="saveAddKitBtn">Save Kit</button>
+            <button type="button" class="btn-save-download" id="saveAndDownloadAddBtn" title="Save this kit and download the updated HTML file">📥 Save &amp; Download HTML</button>
           </div>
         </form>
       </div>
@@ -689,12 +765,10 @@
         </div>
 
         <div class="form-group">
-          <input type="text" id="editFilterInput" placeholder="Filter tools (e.g. SPDRS, MAXS, ECRD)..." />
+          <input type="text" id="editFilterInput" placeholder="Filter tools (e.g. SPDRS, MAXS, ECRD)...">
         </div>
 
-        <div class="tool-list-box" id="editToolListBox">
-          <!-- Dynamically populated -->
-        </div>
+        <div class="tool-list-box" id="editToolListBox"></div>
 
         <!-- Form for editing the selected tool -->
         <div id="editToolFormArea" style="display:none; border-top: 1px solid #ddd; padding-top: 12px;">
@@ -704,22 +778,18 @@
 
           <div class="form-group">
             <label for="editPartNumberInput">Corrected Kit Part Number *</label>
-            <input
-              type="text"
-              id="editPartNumberInput"
-              style="font-size: 1.2em; font-weight: bold; color: #d60000; font-family: monospace;"
-              required
-            />
+            <input type="text" id="editPartNumberInput" style="font-size: 1.2em; font-weight: bold; color: #d60000; font-family: monospace;" required="">
           </div>
 
           <div class="form-group">
             <label for="editNotesInput">Notes / Correction reason</label>
-            <input type="text" id="editNotesInput" placeholder="e.g. Typo fix" />
+            <input type="text" id="editNotesInput" placeholder="e.g. Typo fix">
           </div>
 
           <div class="form-actions">
             <button type="button" class="btn-cancel" id="cancelEditBtn">Cancel</button>
             <button type="button" class="btn-save" id="saveEditBtn">Save Correction</button>
+            <button type="button" class="btn-save-download" id="saveAndDownloadEditBtn" title="Save correction and download the updated HTML file">📥 Save &amp; Download HTML</button>
           </div>
         </div>
       </div>
@@ -727,15 +797,14 @@
       <!-- TAB 3: DELETE / MANAGE KITS -->
       <div id="tabContentManage" class="tab-content">
         <div class="form-group">
-          <input type="text" id="manageFilterInput" placeholder="Search tool or part number to delete..." />
+          <input type="text" id="manageFilterInput" placeholder="Search tool or part number to delete...">
         </div>
 
-        <div class="tool-list-box" id="manageToolListBox" style="max-height: 280px;">
-          <!-- Dynamically populated -->
-        </div>
+        <div class="tool-list-box" id="manageToolListBox" style="max-height: 280px;"></div>
 
-        <div class="form-actions">
+        <div class="form-actions" style="justify-content: space-between;">
           <button type="button" class="btn-cancel" id="closeManageBtn">Close</button>
+          <button type="button" class="btn-download-sharepoint" id="manageDownloadHtmlBtn">📥 Download Updated HTML</button>
         </div>
       </div>
     </div>
@@ -744,12 +813,10 @@
   <!-- ======================================================== -->
   <!-- 3. IN-PAGE CONFIRM DELETE MODAL (No window.confirm!)     -->
   <!-- ======================================================== -->
-  <div id="confirmDeleteModal" class="modal-overlay">
+  <div id="confirmDeleteModal" class="modal-overlay" style="display: none;">
     <div class="modal-card" style="max-width: 400px; text-align: center;">
       <h3 style="color:#b00020; margin-top:0;">Confirm Deletion</h3>
-      <p id="confirmDeleteMsg" style="font-size: 0.9em; color:#444; margin: 16px 0;">
-        Are you sure you want to delete this kit?
-      </p>
+      <p id="confirmDeleteMsg" style="font-size: 0.9em; color:#444; margin: 16px 0;">Are you sure you want to delete kit entry <strong>#126546849</strong> for <strong>fnfn</strong> (ora)?</p>
       <div style="display: flex; justify-content: center; gap: 12px;">
         <button type="button" class="btn-cancel" id="cancelDeleteBtn">Cancel</button>
         <button type="button" class="btn-save" id="confirmDeleteBtn" style="background:#c9302c;">Delete</button>
@@ -760,164 +827,810 @@
   <script>
   (() => {
     const STORAGE_KEY = 'sonde_sls_kit_data_v1';
+    const STORAGE_VERSION_KEY = 'sonde_sls_kit_data_version';
     const ADMIN_PASSWORD = '9710713';
 
+    // === EMBEDDED_DATASET_START ===
+    const DATA_VERSION = '1791666868130';
     const INITIAL_KITS = [
-      // SPEAR/TTiX
-      { asset: "SPDRS-BA", maintenance: "SLS", level: "1", kit: "102057866", family: "SPEAR/TTiX" },
-      { asset: "SPDRS-BA", maintenance: "SLS", level: "2", kit: "102059436", family: "SPEAR/TTiX" },
-      { asset: "SPDRS-BA", maintenance: "SLS", level: "3", kit: "102059459", family: "SPEAR/TTiX" },
-      { asset: "SPDRS-BA", maintenance: "SLS", level: "4", kit: "103348681", family: "SPEAR/TTiX" },
-      { asset: "SPDRS-BA", maintenance: "WA", level: "1", kit: "103053762", family: "SPEAR/TTiX" },
-      { asset: "SPHYS-BA", maintenance: "SLS", level: "1", kit: "102752203", family: "SPEAR/TTiX" },
-      { asset: "SPHYS-BA", maintenance: "SLS", level: "2", kit: "102059486", family: "SPEAR/TTiX" },
-      { asset: "SPHYS-BA", maintenance: "WA", level: "1", kit: "103053776", family: "SPEAR/TTiX" },
-      { asset: "SPCPS-BA/BB", maintenance: "SLS", level: "1", kit: "102059469", family: "SPEAR/TTiX" },
-      { asset: "SPCPS-BA/BB", maintenance: "SLS", level: "2", kit: "102059473", family: "SPEAR/TTiX" },
-      { asset: "SPCPS-BA/BB", maintenance: "SLS", level: "3", kit: "102059480", family: "SPEAR/TTiX" },
-      { asset: "SPCPS-BA/BB", maintenance: "WA", level: "1", kit: "103053800", family: "SPEAR/TTiX" },
-      { asset: "SAH-SAA", maintenance: "SLS", level: "1", kit: "101946524", family: "SPEAR/TTiX" },
-      { asset: "SAH-SAA", maintenance: "SLS", level: "2", kit: "101946525", family: "SPEAR/TTiX" },
-      { asset: "SAH-SAA", maintenance: "WA", level: "1", kit: "102886785", family: "SPEAR/TTiX" },
-      { asset: "WIRED-SAA", maintenance: "SLS", level: "1", kit: "101946517", family: "SPEAR/TTiX" },
-      { asset: "WIRED-SAA", maintenance: "SLS", level: "2", kit: "101946518", family: "SPEAR/TTiX" },
-      { asset: "WIRED-SAA", maintenance: "SLS", level: "3", kit: "102843173", family: "SPEAR/TTiX" },
+  {
+    "asset": "SPDRS-BA",
+    "maintenance": "SLS",
+    "level": "1",
+    "kit": "102057866",
+    "family": "SPEAR/TTiX"
+  },
+  {
+    "asset": "SPDRS-BA",
+    "maintenance": "SLS",
+    "level": "2",
+    "kit": "102059436",
+    "family": "SPEAR/TTiX"
+  },
+  {
+    "asset": "SPDRS-BA",
+    "maintenance": "SLS",
+    "level": "3",
+    "kit": "102059459",
+    "family": "SPEAR/TTiX"
+  },
+  {
+    "asset": "SPDRS-BA",
+    "maintenance": "SLS",
+    "level": "4",
+    "kit": "103348681",
+    "family": "SPEAR/TTiX"
+  },
+  {
+    "asset": "SPDRS-BA",
+    "maintenance": "WA",
+    "level": "1",
+    "kit": "103053762",
+    "family": "SPEAR/TTiX"
+  },
+  {
+    "asset": "SPHYS-BA",
+    "maintenance": "SLS",
+    "level": "1",
+    "kit": "102752203",
+    "family": "SPEAR/TTiX"
+  },
+  {
+    "asset": "SPHYS-BA",
+    "maintenance": "SLS",
+    "level": "2",
+    "kit": "102059486",
+    "family": "SPEAR/TTiX"
+  },
+  {
+    "asset": "SPHYS-BA",
+    "maintenance": "WA",
+    "level": "1",
+    "kit": "103053776",
+    "family": "SPEAR/TTiX"
+  },
+  {
+    "asset": "SPCPS-BA/BB",
+    "maintenance": "SLS",
+    "level": "1",
+    "kit": "102059469",
+    "family": "SPEAR/TTiX"
+  },
+  {
+    "asset": "SPCPS-BA/BB",
+    "maintenance": "SLS",
+    "level": "2",
+    "kit": "102059473",
+    "family": "SPEAR/TTiX"
+  },
+  {
+    "asset": "SPCPS-BA/BB",
+    "maintenance": "SLS",
+    "level": "3",
+    "kit": "102059480",
+    "family": "SPEAR/TTiX"
+  },
+  {
+    "asset": "SPCPS-BA/BB",
+    "maintenance": "WA",
+    "level": "1",
+    "kit": "103053800",
+    "family": "SPEAR/TTiX"
+  },
+  {
+    "asset": "SAH-SAA",
+    "maintenance": "SLS",
+    "level": "1",
+    "kit": "101946524",
+    "family": "SPEAR/TTiX"
+  },
+  {
+    "asset": "SAH-SAA",
+    "maintenance": "SLS",
+    "level": "2",
+    "kit": "101946525",
+    "family": "SPEAR/TTiX"
+  },
+  {
+    "asset": "SAH-SAA",
+    "maintenance": "WA",
+    "level": "1",
+    "kit": "102886785",
+    "family": "SPEAR/TTiX"
+  },
+  {
+    "asset": "WIRED-SAA",
+    "maintenance": "SLS",
+    "level": "1",
+    "kit": "101946517",
+    "family": "SPEAR/TTiX"
+  },
+  {
+    "asset": "WIRED-SAA",
+    "maintenance": "SLS",
+    "level": "2",
+    "kit": "101946518",
+    "family": "SPEAR/TTiX"
+  },
+  {
+    "asset": "WIRED-SAA",
+    "maintenance": "SLS",
+    "level": "3",
+    "kit": "102843173",
+    "family": "SPEAR/TTiX"
+  },
+  {
+    "asset": "MAXS-BA",
+    "maintenance": "SLS",
+    "level": "1",
+    "kit": "102794771",
+    "family": "Sonic TOOLS"
+  },
+  {
+    "asset": "MAXS-BA",
+    "maintenance": "SLS",
+    "level": "2",
+    "kit": "J981099",
+    "family": "Sonic TOOLS"
+  },
+  {
+    "asset": "MASS-BA",
+    "maintenance": "SLS",
+    "level": "1",
+    "kit": "102691448",
+    "family": "Sonic TOOLS"
+  },
+  {
+    "asset": "MAXS-BA",
+    "maintenance": "SLS",
+    "level": "2",
+    "kit": "J980909",
+    "family": "Sonic TOOLS"
+  },
+  {
+    "asset": "MAMS-BA/CA/CAE",
+    "maintenance": "SLS",
+    "level": "1",
+    "kit": "103471868",
+    "family": "Sonic TOOLS"
+  },
+  {
+    "asset": "MAMS-CA",
+    "maintenance": "SLS",
+    "level": "2",
+    "kit": "100761705",
+    "family": "Sonic TOOLS"
+  },
+  {
+    "asset": "MAMS-BA",
+    "maintenance": "SLS",
+    "level": "2",
+    "kit": "J980809",
+    "family": "Sonic TOOLS"
+  },
+  {
+    "asset": "ASLT-A/B",
+    "maintenance": "SLS",
+    "level": "2",
+    "kit": "101635859",
+    "family": "Sonic TOOLS"
+  },
+  {
+    "asset": "SMDX-AA",
+    "maintenance": "SLS",
+    "level": "2",
+    "kit": "102063969",
+    "family": "Sonic TOOLS"
+  },
+  {
+    "asset": "SMDR-BD",
+    "maintenance": "SLS",
+    "level": "2",
+    "kit": "102063970",
+    "family": "Sonic TOOLS"
+  },
+  {
+    "asset": "SSIJ-BA",
+    "maintenance": "SLS",
+    "level": "2",
+    "kit": "102063972",
+    "family": "Sonic TOOLS"
+  },
+  {
+    "asset": "SCMS-CB",
+    "maintenance": "SLS",
+    "level": "1",
+    "kit": "103477579",
+    "family": "Sonic TOOLS"
+  },
+  {
+    "asset": "SCMS-CB",
+    "maintenance": "SLS",
+    "level": "2",
+    "kit": "102090836",
+    "family": "Sonic TOOLS"
+  },
+  {
+    "asset": "SCMS-BB",
+    "maintenance": "SLS",
+    "level": "1",
+    "kit": "103477577",
+    "family": "Sonic TOOLS"
+  },
+  {
+    "asset": "SCMS-BB",
+    "maintenance": "SLS",
+    "level": "1",
+    "kit": "103477578",
+    "family": "Sonic TOOLS"
+  },
+  {
+    "asset": "SAH-NB",
+    "maintenance": "SLS",
+    "level": "2",
+    "kit": "103471563",
+    "family": "Swivel Heads - PS"
+  },
+  {
+    "asset": "SAH-G",
+    "maintenance": "SLS",
+    "level": "2",
+    "kit": "102689827",
+    "family": "Swivel Heads - PS"
+  },
+  {
+    "asset": "MSH-A",
+    "maintenance": "SLS",
+    "level": "2",
+    "kit": "103265468",
+    "family": "Swivel Heads - PS"
+  },
+  {
+    "asset": "GAS Seal KIT",
+    "maintenance": "SLS",
+    "level": "2",
+    "kit": "100139136",
+    "family": "Swivel Heads - PS"
+  },
+  {
+    "asset": "SAH-JB (LOW TEMP)",
+    "maintenance": "SLS",
+    "level": "2",
+    "kit": "100027200",
+    "family": "Swivel Heads - ES"
+  },
+  {
+    "asset": "SAH-JB (HI-TEMP)",
+    "maintenance": "SLS",
+    "level": "2",
+    "kit": "102085277",
+    "family": "Swivel Heads - ES"
+  },
+  {
+    "asset": "PPC-B",
+    "maintenance": "SLS",
+    "level": "2",
+    "kit": "100133868",
+    "family": "Caliper TOOLS"
+  },
+  {
+    "asset": "HRMS-H",
+    "maintenance": "SLS",
+    "level": "3",
+    "kit": "101695018",
+    "family": "Caliper TOOLS"
+  },
+  {
+    "asset": "HRMS-H",
+    "maintenance": "SLS",
+    "level": "4",
+    "kit": "101695015",
+    "family": "Caliper TOOLS"
+  },
+  {
+    "asset": "ADS-C",
+    "maintenance": "SLS",
+    "level": "3",
+    "kit": "103320855",
+    "family": "Caliper TOOLS"
+  },
+  {
+    "asset": "ADS-C",
+    "maintenance": "SLS",
+    "level": "4",
+    "kit": "100737923",
+    "family": "Caliper TOOLS"
+  },
+  {
+    "asset": "NGIS-A",
+    "maintenance": "SLS",
+    "level": "1",
+    "kit": "101399045",
+    "family": "Imaging TOOLS"
+  },
+  {
+    "asset": "NGIS-A",
+    "maintenance": "SLS",
+    "level": "2",
+    "kit": "103319761",
+    "family": "Imaging TOOLS"
+  },
+  {
+    "asset": "NGIS-A",
+    "maintenance": "SLS",
+    "level": "3",
+    "kit": "101328856",
+    "family": "Imaging TOOLS"
+  },
+  {
+    "asset": "NGIP-CA (Slim PAD)",
+    "maintenance": "SLS",
+    "level": "1",
+    "kit": "103073977",
+    "family": "Imaging TOOLS"
+  },
+  {
+    "asset": "NGIP-CA (Slim PAD)",
+    "maintenance": "SLS",
+    "level": "2",
+    "kit": "103074016",
+    "family": "Imaging TOOLS"
+  },
+  {
+    "asset": "NGIP-AA (STD PAD)",
+    "maintenance": "SLS",
+    "level": "1",
+    "kit": "101682768",
+    "family": "Imaging TOOLS"
+  },
+  {
+    "asset": "NGIP-AA (STD PAD)",
+    "maintenance": "SLS",
+    "level": "2",
+    "kit": "101328857",
+    "family": "Imaging TOOLS"
+  },
+  {
+    "asset": "FBSS-B",
+    "maintenance": "SLS",
+    "level": "1",
+    "kit": "101617863",
+    "family": "Imaging TOOLS"
+  },
+  {
+    "asset": "FBSS-B",
+    "maintenance": "SLS",
+    "level": "2",
+    "kit": "101617864",
+    "family": "Imaging TOOLS"
+  },
+  {
+    "asset": "FBSS-B",
+    "maintenance": "SLS",
+    "level": "3",
+    "kit": "103309729",
+    "family": "Imaging TOOLS"
+  },
+  {
+    "asset": "FBSS-B",
+    "maintenance": "SLS",
+    "level": "4",
+    "kit": "101617865",
+    "family": "Imaging TOOLS"
+  },
+  {
+    "asset": "VSIS-GA/IA",
+    "maintenance": "SLS",
+    "level": "1",
+    "kit": "103137605",
+    "family": "Seismic TOOLS"
+  },
+  {
+    "asset": "VSIS-GA/IA",
+    "maintenance": "SLS",
+    "level": "2",
+    "kit": "101332490",
+    "family": "Seismic TOOLS"
+  },
+  {
+    "asset": "VSIS-GA/IA",
+    "maintenance": "SLS",
+    "level": "3",
+    "kit": "102024975",
+    "family": "Seismic TOOLS"
+  },
+  {
+    "asset": "VSIS-CA/DA",
+    "maintenance": "SLS",
+    "level": "1",
+    "kit": "103130221",
+    "family": "Seismic TOOLS"
+  },
+  {
+    "asset": "VSIS-CA/DA",
+    "maintenance": "SLS",
+    "level": "2",
+    "kit": "101333299",
+    "family": "Seismic TOOLS"
+  },
+  {
+    "asset": "VSIS-CA/DA",
+    "maintenance": "SLS",
+    "level": "3",
+    "kit": "102024977",
+    "family": "Seismic TOOLS"
+  },
+  {
+    "asset": "ECRD-E",
+    "maintenance": "SLS",
+    "level": "1",
+    "kit": "102753673",
+    "family": "Release Device"
+  },
+  {
+    "asset": "ECRD-E",
+    "maintenance": "SLS",
+    "level": "2",
+    "kit": "102753682",
+    "family": "Release Device"
+  },
+  {
+    "asset": "ECRD-H (LOW TEMP)",
+    "maintenance": "SLS",
+    "level": "1",
+    "kit": "102089807",
+    "family": "Release Device"
+  },
+  {
+    "asset": "ECRD-H (LOW TEMP)",
+    "maintenance": "SLS",
+    "level": "2",
+    "kit": "102089830",
+    "family": "Release Device"
+  },
+  {
+    "asset": "ECRD-H (HI-TEMP)",
+    "maintenance": "SLS",
+    "level": "1",
+    "kit": "102089828",
+    "family": "Release Device"
+  },
+  {
+    "asset": "ECRD-H (HI-TEMP)",
+    "maintenance": "SLS",
+    "level": "2",
+    "kit": "102089831",
+    "family": "Release Device"
+  },
+  {
+    "asset": "AS-ERS-AB",
+    "maintenance": "SLS",
+    "level": "1",
+    "kit": "102104180",
+    "family": "Release Device"
+  },
+  {
+    "asset": "AS-ERS-AB",
+    "maintenance": "SLS",
+    "level": "2",
+    "kit": "102518822",
+    "family": "Release Device"
+  },
+  {
+    "asset": "ERS-E/EH",
+    "maintenance": "SLS",
+    "level": "1",
+    "kit": "102159731",
+    "family": "Release Device"
+  },
+  {
+    "asset": "ERS-E/EH",
+    "maintenance": "SLS",
+    "level": "2",
+    "kit": "103442749",
+    "family": "Release Device"
+  },
+  {
+    "asset": "ERS-E/EH",
+    "maintenance": "SLS",
+    "level": "3",
+    "kit": "102159767",
+    "family": "Release Device"
+  },
+  {
+    "asset": "TBDU-A/B",
+    "maintenance": "SLS",
+    "level": "2",
+    "kit": "103196476",
+    "family": "ThruBIT"
+  },
+  {
+    "asset": "TBDL-A/B",
+    "maintenance": "SLS",
+    "level": "2",
+    "kit": "103196477",
+    "family": "ThruBIT"
+  },
+  {
+    "asset": "TBNGIS-AA",
+    "maintenance": "SLS",
+    "level": "2",
+    "kit": "103634532",
+    "family": "ThruBIT"
+  },
+  {
+    "asset": "TBNGIA-AA",
+    "maintenance": "SLS",
+    "level": "2",
+    "kit": "103634532",
+    "family": "ThruBIT"
+  },
+  {
+    "asset": "TBMLT-CA",
+    "maintenance": "SLS",
+    "level": "2",
+    "kit": "103618334",
+    "family": "ThruBIT"
+  },
+  {
+    "asset": "FSIS-A",
+    "maintenance": "SLS",
+    "level": "2",
+    "kit": "101522603",
+    "family": "FSI"
+  },
+  {
+    "asset": "SPTCS-AA",
+    "maintenance": "SLS",
+    "level": "1",
+    "kit": "104209777",
+    "family": "Tubing Cutter/Resolve iX"
+  },
+  {
+    "asset": "SPTCS-AA",
+    "maintenance": "SLS",
+    "level": "2",
+    "kit": "104209786",
+    "family": "Tubing Cutter/Resolve iX"
+  },
+  {
+    "asset": "SPRAS-AA",
+    "maintenance": "SLS",
+    "level": "1",
+    "kit": "104197527",
+    "family": "Tubing Cutter/Resolve iX"
+  },
+  {
+    "asset": "SPRAS-AA",
+    "maintenance": "SLS",
+    "level": "2",
+    "kit": "104201905",
+    "family": "Tubing Cutter/Resolve iX"
+  },
+  {
+    "asset": "SPABS-AA",
+    "maintenance": "SLS",
+    "level": "1",
+    "kit": "104197709",
+    "family": "Tubing Cutter/Resolve iX"
+  },
+  {
+    "asset": "SPABS-AA",
+    "maintenance": "SLS",
+    "level": "2",
+    "kit": "104197747",
+    "family": "Tubing Cutter/Resolve iX"
+  },
+  {
+    "asset": "SPRPS-DA",
+    "maintenance": "SLS",
+    "level": "1",
+    "kit": "101956938",
+    "family": "Tubing Cutter/Resolve iX"
+  },
+  {
+    "asset": "SPRPS-DA",
+    "maintenance": "SLS",
+    "level": "2",
+    "kit": "101956939",
+    "family": "Tubing Cutter/Resolve iX"
+  },
+  {
+    "asset": "SPRPS-MA",
+    "maintenance": "SLS",
+    "level": "1",
+    "kit": "103654349",
+    "family": "Tubing Cutter/Resolve iX"
+  },
+  {
+    "asset": "SPRPS-MA",
+    "maintenance": "SLS",
+    "level": "2",
+    "kit": "103647617",
+    "family": "Tubing Cutter/Resolve iX"
+  },
+  {
+    "asset": "PSTS-SB",
+    "maintenance": "SLS",
+    "level": "2",
+    "kit": "101736546",
+    "family": "MaxTRAC"
+  },
+  {
+    "asset": "PSTS-SB",
+    "maintenance": "SLS",
+    "level": "3",
+    "kit": "101736550",
+    "family": "MaxTRAC"
+  },
+  {
+    "asset": "Capella Oil",
+    "maintenance": "SLS",
+    "level": "1",
+    "kit": "B015518",
+    "family": "SONDE Oils"
+  },
+  {
+    "asset": "MSIP Oil",
+    "maintenance": "SLS",
+    "level": "1",
+    "kit": "B950546",
+    "family": "SONDE Oils"
+  },
+  {
+    "asset": "ASLT Oil",
+    "maintenance": "SLS",
+    "level": "1",
+    "kit": "B950546",
+    "family": "SONDE Oils"
+  },
+  {
+    "asset": "J-26 Oil",
+    "maintenance": "SLS",
+    "level": "1",
+    "kit": "B033556",
+    "family": "SONDE Oils"
+  },
+  {
+    "asset": "J-13 Oil",
+    "maintenance": "SLS",
+    "level": "1",
+    "kit": "B074044",
+    "family": "SONDE Oils"
+  },
+  {
+    "asset": "MRX Oil",
+    "maintenance": "SLS",
+    "level": "1",
+    "kit": "100660991",
+    "family": "SONDE Oils"
+  },
+  {
+    "asset": "USI-Tx Oil",
+    "maintenance": "SLS",
+    "level": "1",
+    "kit": "B076321",
+    "family": "SONDE Oils"
+  },
+  {
+    "asset": "DD-27 Oil",
+    "maintenance": "SLS",
+    "level": "1",
+    "kit": "103063625",
+    "family": "SONDE Oils"
+  },
+  {
+    "asset": "USIT Oil",
+    "maintenance": "SLS",
+    "level": "1",
+    "kit": "101561806",
+    "family": "SONDE Oils"
+  },
+  {
+    "asset": "GMS Oil",
+    "maintenance": "SLS",
+    "level": "1",
+    "kit": "104911025",
+    "family": "SONDE Oils"
+  },
+  {
+    "asset": "XHMS-AA",
+    "maintenance": "SLS",
+    "level": "1",
+    "kit": "101127749",
+    "family": "TuffTRAC"
+  },
+  {
+    "asset": "XHMS-AA",
+    "maintenance": "SLS",
+    "level": "2",
+    "kit": "101127750",
+    "family": "TuffTRAC"
+  },
+  {
+    "asset": "XDRS/LS-AA",
+    "maintenance": "SLS",
+    "level": "1",
+    "kit": "101127758",
+    "family": "TuffTRAC"
+  },
+  {
+    "asset": "XDRS/LS-AA",
+    "maintenance": "SLS",
+    "level": "2",
+    "kit": "101127760",
+    "family": "TuffTRAC"
+  },
+  {
+    "asset": "XDRS/LS-AA",
+    "maintenance": "SLS",
+    "level": "3",
+    "kit": "101953799",
+    "family": "TuffTRAC"
+  },
+  {
+    "asset": "XDRS/LS-AA",
+    "maintenance": "SLS",
+    "level": "4",
+    "kit": "102966386",
+    "family": "TuffTRAC"
+  },
+  {
+    "asset": "XCAS-AA/MA",
+    "maintenance": "SLS",
+    "level": "1",
+    "kit": "102701289",
+    "family": "TuffTRAC"
+  },
+  {
+    "asset": "XCAS-AA/MA",
+    "maintenance": "SLS",
+    "level": "2",
+    "kit": "101127751",
+    "family": "TuffTRAC"
+  },
+  {
+    "asset": "SAH-RB",
+    "maintenance": "SLS",
+    "level": "1",
+    "kit": "102850250",
+    "family": "TuffTRAC"
+  },
+  {
+    "asset": "SAH-RB",
+    "maintenance": "SLS",
+    "level": "2",
+    "kit": "102850251",
+    "family": "TuffTRAC"
+  }
+];
+    // === EMBEDDED_DATASET_END ===
 
-      // Sonic TOOLS
-      { asset: "MAXS-BA", maintenance: "SLS", level: "1", kit: "102794771", family: "Sonic TOOLS" },
-      { asset: "MAXS-BA", maintenance: "SLS", level: "2", kit: "J981099", family: "Sonic TOOLS" },
-      { asset: "MASS-BA", maintenance: "SLS", level: "1", kit: "102691448", family: "Sonic TOOLS" },
-      { asset: "MAXS-BA", maintenance: "SLS", level: "2", kit: "J980909", family: "Sonic TOOLS" },
-      { asset: "MAMS-BA/CA/CAE", maintenance: "SLS", level: "1", kit: "103471868", family: "Sonic TOOLS" },
-      { asset: "MAMS-CA", maintenance: "SLS", level: "2", kit: "100761705", family: "Sonic TOOLS" },
-      { asset: "MAMS-BA", maintenance: "SLS", level: "2", kit: "J980809", family: "Sonic TOOLS" },
-      { asset: "ASLT-A/B", maintenance: "SLS", level: "2", kit: "101635859", family: "Sonic TOOLS" },
-      { asset: "SMDX-AA", maintenance: "SLS", level: "2", kit: "102063969", family: "Sonic TOOLS" },
-      { asset: "SMDR-BD", maintenance: "SLS", level: "2", kit: "102063970", family: "Sonic TOOLS" },
-      { asset: "SSIJ-BA", maintenance: "SLS", level: "2", kit: "102063972", family: "Sonic TOOLS" },
-      { asset: "SCMS-CB", maintenance: "SLS", level: "1", kit: "103477579", family: "Sonic TOOLS" },
-      { asset: "SCMS-CB", maintenance: "SLS", level: "2", kit: "102090836", family: "Sonic TOOLS" },
-      { asset: "SCMS-BB", maintenance: "SLS", level: "1", kit: "103477577", family: "Sonic TOOLS" },
-      { asset: "SCMS-BB", maintenance: "SLS", level: "1", kit: "103477578", family: "Sonic TOOLS" },
-
-      // Swivel Heads - PS
-      { asset: "SAH-NB", maintenance: "SLS", level: "2", kit: "103471563", family: "Swivel Heads - PS" },
-      { asset: "SAH-G", maintenance: "SLS", level: "2", kit: "102689827", family: "Swivel Heads - PS" },
-      { asset: "MSH-A", maintenance: "SLS", level: "2", kit: "103265468", family: "Swivel Heads - PS" },
-      { asset: "GAS Seal KIT", maintenance: "SLS", level: "2", kit: "100139136", family: "Swivel Heads - PS" },
-
-      // Swivel Heads - ES
-      { asset: "SAH-JB (LOW TEMP)", maintenance: "SLS", level: "2", kit: "100027200", family: "Swivel Heads - ES" },
-      { asset: "SAH-JB (HI-TEMP)", maintenance: "SLS", level: "2", kit: "102085277", family: "Swivel Heads - ES" },
-
-      // Caliper TOOLS
-      { asset: "PPC-B", maintenance: "SLS", level: "2", kit: "100133868", family: "Caliper TOOLS" },
-      { asset: "HRMS-H", maintenance: "SLS", level: "3", kit: "101695018", family: "Caliper TOOLS" },
-      { asset: "HRMS-H", maintenance: "SLS", level: "4", kit: "101695015", family: "Caliper TOOLS" },
-      { asset: "ADS-C", maintenance: "SLS", level: "3", kit: "103320855", family: "Caliper TOOLS" },
-      { asset: "ADS-C", maintenance: "SLS", level: "4", kit: "100737923", family: "Caliper TOOLS" },
-
-      // Imaging TOOLS
-      { asset: "NGIS-A", maintenance: "SLS", level: "1", kit: "101399045", family: "Imaging TOOLS" },
-      { asset: "NGIS-A", maintenance: "SLS", level: "2", kit: "103319761", family: "Imaging TOOLS" },
-      { asset: "NGIS-A", maintenance: "SLS", level: "3", kit: "101328856", family: "Imaging TOOLS" },
-      { asset: "NGIP-CA (Slim PAD)", maintenance: "SLS", level: "1", kit: "103073977", family: "Imaging TOOLS" },
-      { asset: "NGIP-CA (Slim PAD)", maintenance: "SLS", level: "2", kit: "103074016", family: "Imaging TOOLS" },
-      { asset: "NGIP-AA (STD PAD)", maintenance: "SLS", level: "1", kit: "101682768", family: "Imaging TOOLS" },
-      { asset: "NGIP-AA (STD PAD)", maintenance: "SLS", level: "2", kit: "101328857", family: "Imaging TOOLS" },
-      { asset: "FBSS-B", maintenance: "SLS", level: "1", kit: "101617863", family: "Imaging TOOLS" },
-      { asset: "FBSS-B", maintenance: "SLS", level: "2", kit: "101617864", family: "Imaging TOOLS" },
-      { asset: "FBSS-B", maintenance: "SLS", level: "3", kit: "103309729", family: "Imaging TOOLS" },
-      { asset: "FBSS-B", maintenance: "SLS", level: "4", kit: "101617865", family: "Imaging TOOLS" },
-
-      // Seismic TOOLS
-      { asset: "VSIS-GA/IA", maintenance: "SLS", level: "1", kit: "103137605", family: "Seismic TOOLS" },
-      { asset: "VSIS-GA/IA", maintenance: "SLS", level: "2", kit: "101332490", family: "Seismic TOOLS" },
-      { asset: "VSIS-GA/IA", maintenance: "SLS", level: "3", kit: "102024975", family: "Seismic TOOLS" },
-      { asset: "VSIS-CA/DA", maintenance: "SLS", level: "1", kit: "103130221", family: "Seismic TOOLS" },
-      { asset: "VSIS-CA/DA", maintenance: "SLS", level: "2", kit: "101333299", family: "Seismic TOOLS" },
-      { asset: "VSIS-CA/DA", maintenance: "SLS", level: "3", kit: "102024977", family: "Seismic TOOLS" },
-
-      // Release Device
-      { asset: "ECRD-E", maintenance: "SLS", level: "1", kit: "102753673", family: "Release Device" },
-      { asset: "ECRD-E", maintenance: "SLS", level: "2", kit: "102753682", family: "Release Device" },
-      { asset: "ECRD-H (LOW TEMP)", maintenance: "SLS", level: "1", kit: "102089807", family: "Release Device" },
-      { asset: "ECRD-H (LOW TEMP)", maintenance: "SLS", level: "2", kit: "102089830", family: "Release Device" },
-      { asset: "ECRD-H (HI-TEMP)", maintenance: "SLS", level: "1", kit: "102089828", family: "Release Device" },
-      { asset: "ECRD-H (HI-TEMP)", maintenance: "SLS", level: "2", kit: "102089831", family: "Release Device" },
-      { asset: "AS-ERS-AB", maintenance: "SLS", level: "1", kit: "102104180", family: "Release Device" },
-      { asset: "AS-ERS-AB", maintenance: "SLS", level: "2", kit: "102518822", family: "Release Device" },
-      { asset: "ERS-E/EH", maintenance: "SLS", level: "1", kit: "102159731", family: "Release Device" },
-      { asset: "ERS-E/EH", maintenance: "SLS", level: "2", kit: "103442749", family: "Release Device" },
-      { asset: "ERS-E/EH", maintenance: "SLS", level: "3", kit: "102159767", family: "Release Device" },
-
-      // ThruBIT
-      { asset: "TBDU-A/B", maintenance: "SLS", level: "2", kit: "103196476", family: "ThruBIT" },
-      { asset: "TBDL-A/B", maintenance: "SLS", level: "2", kit: "103196477", family: "ThruBIT" },
-      { asset: "TBNGIS-AA", maintenance: "SLS", level: "2", kit: "103634532", family: "ThruBIT" },
-      { asset: "TBNGIA-AA", maintenance: "SLS", level: "2", kit: "103634532", family: "ThruBIT" },
-      { asset: "TBMLT-CA", maintenance: "SLS", level: "2", kit: "103618334", family: "ThruBIT" },
-
-      // FSI
-      { asset: "FSIS-A", maintenance: "SLS", level: "2", kit: "101522603", family: "FSI" },
-
-      // Tubing Cutter/Resolve iX
-      { asset: "SPTCS-AA", maintenance: "SLS", level: "1", kit: "104209777", family: "Tubing Cutter/Resolve iX" },
-      { asset: "SPTCS-AA", maintenance: "SLS", level: "2", kit: "104209786", family: "Tubing Cutter/Resolve iX" },
-      { asset: "SPRAS-AA", maintenance: "SLS", level: "1", kit: "104197527", family: "Tubing Cutter/Resolve iX" },
-      { asset: "SPRAS-AA", maintenance: "SLS", level: "2", kit: "104201905", family: "Tubing Cutter/Resolve iX" },
-      { asset: "SPABS-AA", maintenance: "SLS", level: "1", kit: "104197709", family: "Tubing Cutter/Resolve iX" },
-      { asset: "SPABS-AA", maintenance: "SLS", level: "2", kit: "104197747", family: "Tubing Cutter/Resolve iX" },
-      { asset: "SPRPS-DA", maintenance: "SLS", level: "1", kit: "101956938", family: "Tubing Cutter/Resolve iX" },
-      { asset: "SPRPS-DA", maintenance: "SLS", level: "2", kit: "101956939", family: "Tubing Cutter/Resolve iX" },
-      { asset: "SPRPS-MA", maintenance: "SLS", level: "1", kit: "103654349", family: "Tubing Cutter/Resolve iX" },
-      { asset: "SPRPS-MA", maintenance: "SLS", level: "2", kit: "103647617", family: "Tubing Cutter/Resolve iX" },
-
-      // MaxTRAC
-      { asset: "PSTS-SB", maintenance: "SLS", level: "2", kit: "101736546", family: "MaxTRAC" },
-      { asset: "PSTS-SB", maintenance: "SLS", level: "3", kit: "101736550", family: "MaxTRAC" },
-
-      // SONDE Oils
-      { asset: "Capella Oil", maintenance: "SLS", level: "1", kit: "B015518", family: "SONDE Oils" },
-      { asset: "MSIP Oil", maintenance: "SLS", level: "1", kit: "B950546", family: "SONDE Oils" },
-      { asset: "ASLT Oil", maintenance: "SLS", level: "1", kit: "B950546", family: "SONDE Oils" },
-      { asset: "J-26 Oil", maintenance: "SLS", level: "1", kit: "B033556", family: "SONDE Oils" },
-      { asset: "J-13 Oil", maintenance: "SLS", level: "1", kit: "B074044", family: "SONDE Oils" },
-      { asset: "MRX Oil", maintenance: "SLS", level: "1", kit: "100660991", family: "SONDE Oils" },
-      { asset: "USI-Tx Oil", maintenance: "SLS", level: "1", kit: "B076321", family: "SONDE Oils" },
-      { asset: "DD-27 Oil", maintenance: "SLS", level: "1", kit: "103063625", family: "SONDE Oils" },
-      { asset: "USIT Oil", maintenance: "SLS", level: "1", kit: "101561806", family: "SONDE Oils" },
-      { asset: "GMS Oil", maintenance: "SLS", level: "1", kit: "104911025", family: "SONDE Oils" },
-
-      // TuffTRAC
-      { asset: "XHMS-AA", maintenance: "SLS", level: "1", kit: "101127749", family: "TuffTRAC" },
-      { asset: "XHMS-AA", maintenance: "SLS", level: "2", kit: "101127750", family: "TuffTRAC" },
-      { asset: "XDRS/LS-AA", maintenance: "SLS", level: "1", kit: "101127758", family: "TuffTRAC" },
-      { asset: "XDRS/LS-AA", maintenance: "SLS", level: "2", kit: "101127760", family: "TuffTRAC" },
-      { asset: "XDRS/LS-AA", maintenance: "SLS", level: "3", kit: "101953799", family: "TuffTRAC" },
-      { asset: "XDRS/LS-AA", maintenance: "SLS", level: "4", kit: "102966386", family: "TuffTRAC" },
-      { asset: "XCAS-AA/MA", maintenance: "SLS", level: "1", kit: "102701289", family: "TuffTRAC" },
-      { asset: "XCAS-AA/MA", maintenance: "SLS", level: "2", kit: "101127751", family: "TuffTRAC" },
-      { asset: "SAH-RB", maintenance: "SLS", level: "1", kit: "102850250", family: "TuffTRAC" },
-      { asset: "SAH-RB", maintenance: "SLS", level: "2", kit: "102850251", family: "TuffTRAC" }
-    ];
-
-    // Load kitData with safe storage fallback
+    // Load kitData with version synchronization
     let kitData = [];
     try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) {
-        kitData = JSON.parse(saved);
+      const savedVersion = localStorage.getItem(STORAGE_VERSION_KEY);
+      // If the file in SharePoint has a new dataset version, prioritize the newly embedded INITIAL_KITS
+      if (savedVersion === String(DATA_VERSION)) {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+          kitData = JSON.parse(saved);
+        }
       }
     } catch (e) {}
 
     if (!Array.isArray(kitData) || kitData.length === 0) {
       kitData = JSON.parse(JSON.stringify(INITIAL_KITS));
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(kitData));
+        localStorage.setItem(STORAGE_VERSION_KEY, String(DATA_VERSION));
+      } catch (e) {}
     }
 
     function saveKitData() {
       try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(kitData));
+        localStorage.setItem(STORAGE_VERSION_KEY, String(DATA_VERSION));
       } catch (e) {}
       updateKitCount();
     }
@@ -971,14 +1684,15 @@
 
     // Modals
     const authModal = document.getElementById('authModal');
-    const authForm = document.getElementById('authForm');
     const authPasswordInput = document.getElementById('authPassword');
     const authError = document.getElementById('authError');
     const closeAuthModalBtn = document.getElementById('closeAuthModalBtn');
     const cancelAuthBtn = document.getElementById('cancelAuthBtn');
+    const authSubmitBtn = document.getElementById('authSubmitBtn');
 
     const adminHubModal = document.getElementById('adminHubModal');
     const closeAdminHubBtn = document.getElementById('closeAdminHubBtn');
+    const lockAdminModalBtn = document.getElementById('lockAdminModalBtn');
 
     const confirmDeleteModal = document.getElementById('confirmDeleteModal');
     const confirmDeleteMsg = document.getElementById('confirmDeleteMsg');
@@ -1005,6 +1719,7 @@
     const mKit = document.getElementById('mKit');
     const mNotes = document.getElementById('mNotes');
     const cancelAddBtn = document.getElementById('cancelAddBtn');
+    const saveAddKitBtn = document.getElementById('saveAddKitBtn');
 
     // Tab 2 Edit elements
     const editFilterInput = document.getElementById('editFilterInput');
@@ -1015,21 +1730,42 @@
     const editNotesInput = document.getElementById('editNotesInput');
     const cancelEditBtn = document.getElementById('cancelEditBtn');
     const saveEditBtn = document.getElementById('saveEditBtn');
+    const saveAndDownloadEditBtn = document.getElementById('saveAndDownloadEditBtn');
 
     // Tab 3 Manage elements
     const manageFilterInput = document.getElementById('manageFilterInput');
     const manageToolListBox = document.getElementById('manageToolListBox');
     const closeManageBtn = document.getElementById('closeManageBtn');
+    const manageDownloadHtmlBtn = document.getElementById('manageDownloadHtmlBtn');
 
-    // Auth State
+    // SharePoint Sync & Download buttons
+    const adminDownloadHtmlBtn = document.getElementById('adminDownloadHtmlBtn');
+    const bannerDownloadHtmlBtn = document.getElementById('bannerDownloadHtmlBtn');
+    const saveAndDownloadAddBtn = document.getElementById('saveAndDownloadAddBtn');
+
+    // State
     let isAuthenticated = false;
-    let pendingAction = null; // function to run after auth
-    let selectedToolForEditing = null;
+    let pendingAction = null;
+    let currentToolToEdit = null;
     let pendingToolToDelete = null;
 
     function updateKitCount() {
-      const customKits = kitData.filter(k => k.isCustom).length;
-      kitCountEl.textContent = `Total Kits: ${kitData.length}` + (customKits > 0 ? ` (${customKits} custom)` : '');
+      if (kitCountEl) {
+        kitCountEl.textContent = `Total Kits: ${kitData.length}`;
+      }
+    }
+
+    // Modal Helpers (Safe display handling for sandboxed iframes)
+    function showModal(el) {
+      if (!el) return;
+      el.style.display = 'flex';
+      el.classList.add('active');
+    }
+
+    function hideModal(el) {
+      if (!el) return;
+      el.classList.remove('active');
+      el.style.display = 'none';
     }
 
     // Help Toggle
@@ -1049,6 +1785,7 @@
 
     // Populate Families
     function populateFamilies() {
+      if (!familyEl) return;
       resetSelect(familyEl, 'Select Family');
       const families = uniq(kitData.map(r => r.family)).sort();
       families.forEach(f => {
@@ -1059,97 +1796,106 @@
       });
     }
 
-    familyEl.addEventListener('change', () => {
-      resetSelect(assetEl, 'Select Asset');
-      resetSelect(maintenanceEl, 'Select Maintenance Type');
-      resetSelect(levelEl, 'Select Level');
+    if (familyEl) {
+      familyEl.addEventListener('change', () => {
+        resetSelect(assetEl, 'Select Asset');
+        resetSelect(maintenanceEl, 'Select Maintenance Type');
+        resetSelect(levelEl, 'Select Level');
 
-      assetEl.disabled = true;
-      maintenanceEl.disabled = true;
-      levelEl.disabled = true;
-      resultEl.innerHTML = '<div style="color: #888; font-size: 0.9em;">Select Asset, Maintenance Type, and Level</div>';
+        assetEl.disabled = true;
+        maintenanceEl.disabled = true;
+        levelEl.disabled = true;
+        resultEl.innerHTML = '<div style="color: #888; font-size: 0.9em;">Select Asset, Maintenance Type, and Level</div>';
 
-      const family = familyEl.value;
-      if (!family) return;
+        const family = familyEl.value;
+        if (!family) return;
 
-      const assets = uniq(kitData.filter(r => r.family === family).map(r => r.asset)).sort();
-      assets.forEach(a => {
-        const opt = document.createElement('option');
-        opt.value = a;
-        opt.textContent = a;
-        assetEl.appendChild(opt);
+        const assets = uniq(kitData.filter(r => r.family === family).map(r => r.asset)).sort();
+        assets.forEach(a => {
+          const opt = document.createElement('option');
+          opt.value = a;
+          opt.textContent = a;
+          assetEl.appendChild(opt);
+        });
+
+        assetEl.disabled = false;
+        defaultIfSingleOption(assetEl, true);
       });
+    }
 
-      assetEl.disabled = false;
-      defaultIfSingleOption(assetEl, true);
-    });
+    if (assetEl) {
+      assetEl.addEventListener('change', () => {
+        resetSelect(maintenanceEl, 'Select Maintenance Type');
+        resetSelect(levelEl, 'Select Level');
 
-    assetEl.addEventListener('change', () => {
-      resetSelect(maintenanceEl, 'Select Maintenance Type');
-      resetSelect(levelEl, 'Select Level');
+        maintenanceEl.disabled = true;
+        levelEl.disabled = true;
+        resultEl.innerHTML = '<div style="color: #888; font-size: 0.9em;">Select Maintenance Type and Level</div>';
 
-      maintenanceEl.disabled = true;
-      levelEl.disabled = true;
-      resultEl.innerHTML = '<div style="color: #888; font-size: 0.9em;">Select Maintenance Type and Level</div>';
+        const family = familyEl.value;
+        const asset = assetEl.value;
+        if (!family || !asset) return;
 
-      const family = familyEl.value;
-      const asset = assetEl.value;
-      if (!family || !asset) return;
+        const maints = uniq(
+          kitData.filter(r => r.family === family && r.asset === asset).map(r => r.maintenance)
+        ).sort();
 
-      const maints = uniq(
-        kitData.filter(r => r.family === family && r.asset === asset).map(r => r.maintenance)
-      ).sort();
+        maints.forEach(m => {
+          const opt = document.createElement('option');
+          opt.value = m;
+          opt.textContent = m;
+          maintenanceEl.appendChild(opt);
+        });
 
-      maints.forEach(m => {
-        const opt = document.createElement('option');
-        opt.value = m;
-        opt.textContent = m;
-        maintenanceEl.appendChild(opt);
+        maintenanceEl.disabled = false;
+        defaultIfSingleOption(maintenanceEl, true);
       });
+    }
 
-      maintenanceEl.disabled = false;
-      defaultIfSingleOption(maintenanceEl, true);
-    });
+    if (maintenanceEl) {
+      maintenanceEl.addEventListener('change', () => {
+        resetSelect(levelEl, 'Select Level');
 
-    maintenanceEl.addEventListener('change', () => {
-      resetSelect(levelEl, 'Select Level');
+        levelEl.disabled = true;
+        resultEl.innerHTML = '<div style="color: #888; font-size: 0.9em;">Select Level</div>';
 
-      levelEl.disabled = true;
-      resultEl.innerHTML = '<div style="color: #888; font-size: 0.9em;">Select Level</div>';
+        const family = familyEl.value;
+        const asset = assetEl.value;
+        const maintenance = maintenanceEl.value;
+        if (!family || !asset || !maintenance) return;
 
-      const family = familyEl.value;
-      const asset = assetEl.value;
-      const maintenance = maintenanceEl.value;
-      if (!family || !asset || !maintenance) return;
+        const levels = uniq(
+          kitData
+            .filter(r => r.family === family && r.asset === asset && r.maintenance === maintenance)
+            .map(r => r.level)
+        ).sort((a, b) => Number(a) - Number(b));
 
-      const levels = uniq(
-        kitData
-          .filter(r => r.family === family && r.asset === asset && r.maintenance === maintenance)
-          .map(r => r.level)
-      ).sort((a, b) => Number(a) - Number(b));
+        levels.forEach(l => {
+          const opt = document.createElement('option');
+          opt.value = l;
+          opt.textContent = 'Level ' + l;
+          levelEl.appendChild(opt);
+        });
 
-      levels.forEach(l => {
-        const opt = document.createElement('option');
-        opt.value = l;
-        opt.textContent = 'Level ' + l;
-        levelEl.appendChild(opt);
+        levelEl.disabled = false;
+        defaultIfSingleOption(levelEl, true);
       });
+    }
 
-      levelEl.disabled = false;
-      defaultIfSingleOption(levelEl, true);
-    });
-
-    levelEl.addEventListener('change', () => {
-      renderResult();
-    });
+    if (levelEl) {
+      levelEl.addEventListener('change', () => {
+        renderResult();
+      });
+    }
 
     function renderResult() {
+      if (!resultEl) return;
       resultEl.innerHTML = '';
 
-      const family = familyEl.value;
-      const asset = assetEl.value;
-      const maintenance = maintenanceEl.value;
-      const level = levelEl.value;
+      const family = familyEl ? familyEl.value : '';
+      const asset = assetEl ? assetEl.value : '';
+      const maintenance = maintenanceEl ? maintenanceEl.value : '';
+      const level = levelEl ? levelEl.value : '';
       if (!family || !asset || !maintenance || !level) return;
 
       const found = kitData.find(r =>
@@ -1164,8 +1910,9 @@
         return;
       }
 
+      // Completely native presentation - no 'Custom' label
       resultEl.innerHTML = `
-        <div class="asset-name">${found.asset} ${found.isCustom ? '<span class="badge-custom">CUSTOM</span>' : ''}</div>
+        <div class="asset-name">${found.asset}</div>
         <div class="kit-part-number" id="displayKitNum">${found.kit}</div>
         <div class="action-btn-row">
           <button type="button" class="copy-btn" id="copyResultBtn">Copy Part Number</button>
@@ -1174,103 +1921,182 @@
         </div>
       `;
 
-      document.getElementById('copyResultBtn').addEventListener('click', () => {
-        navigator.clipboard.writeText(found.kit);
-        const btn = document.getElementById('copyResultBtn');
-        btn.textContent = 'Copied!';
-        setTimeout(() => { btn.textContent = 'Copy Part Number'; }, 1500);
-      });
-
-      document.getElementById('editResultBtn').addEventListener('click', () => {
-        requireAuth(() => {
-          openAdminHub('edit', found);
+      const copyBtn = document.getElementById('copyResultBtn');
+      if (copyBtn) {
+        copyBtn.addEventListener('click', () => {
+          try {
+            navigator.clipboard.writeText(found.kit);
+          } catch (e) {
+            const temp = document.createElement('textarea');
+            temp.value = found.kit;
+            document.body.appendChild(temp);
+            temp.select();
+            document.execCommand('copy');
+            document.body.removeChild(temp);
+          }
+          copyBtn.textContent = 'Copied!';
+          setTimeout(() => { copyBtn.textContent = 'Copy Part Number'; }, 1500);
         });
-      });
+      }
 
-      document.getElementById('deleteResultBtn').addEventListener('click', () => {
-        requireAuth(() => {
-          promptDeleteKit(found);
+      const editBtn = document.getElementById('editResultBtn');
+      if (editBtn) {
+        editBtn.addEventListener('click', () => {
+          if (isAuthenticated) {
+            openAdminHub('edit', found);
+          } else {
+            requireAuth(() => {
+              openAdminHub('edit', found);
+            });
+          }
         });
-      });
+      }
+
+      const delBtn = document.getElementById('deleteResultBtn');
+      if (delBtn) {
+        delBtn.addEventListener('click', () => {
+          if (isAuthenticated) {
+            promptDeleteKit(found);
+          } else {
+            requireAuth(() => {
+              promptDeleteKit(found);
+            });
+          }
+        });
+      }
     }
 
     // ==========================================
-    // AUTH MODAL LOGIC (No window.prompt!)
+    // AUTH & LOCKING LOGIC
     // ==========================================
+    function lockAdmin() {
+      isAuthenticated = false;
+      if (openAdminBtn) {
+        openAdminBtn.classList.remove('authed');
+        openAdminBtn.title = 'Admin Console (Click to unlock)';
+      }
+      if (adminBtnText) {
+        adminBtnText.textContent = 'Admin';
+      }
+      closeAdminHub();
+      showToast('Admin locked. File secured.');
+    }
+
+    function unlockAdmin() {
+      isAuthenticated = true;
+      if (openAdminBtn) {
+        openAdminBtn.classList.add('authed');
+        openAdminBtn.title = 'Admin Unlocked. Click to Lock and secure database';
+      }
+      if (adminBtnText) {
+        adminBtnText.textContent = 'Lock';
+      }
+      hideModal(authModal);
+      showToast('Admin access granted.');
+    }
+
     function requireAuth(onSuccessCallback) {
       if (isAuthenticated) {
-        onSuccessCallback();
+        if (typeof onSuccessCallback === 'function') onSuccessCallback();
         return;
       }
       pendingAction = onSuccessCallback;
-      authError.style.display = 'none';
-      authPasswordInput.value = '';
-      authModal.classList.add('active');
-      setTimeout(() => authPasswordInput.focus(), 50);
+      if (authError) authError.style.display = 'none';
+      if (authPasswordInput) authPasswordInput.value = '';
+      showModal(authModal);
+      setTimeout(() => {
+        if (authPasswordInput) authPasswordInput.focus();
+      }, 60);
     }
 
     function closeAuthModal() {
-      authModal.classList.remove('active');
+      hideModal(authModal);
       pendingAction = null;
     }
 
-    closeAuthModalBtn.addEventListener('click', closeAuthModal);
-    cancelAuthBtn.addEventListener('click', closeAuthModal);
+    if (closeAuthModalBtn) closeAuthModalBtn.addEventListener('click', closeAuthModal);
+    if (cancelAuthBtn) cancelAuthBtn.addEventListener('click', closeAuthModal);
 
-    authForm.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const pw = authPasswordInput.value.trim();
+    function handleUnlock() {
+      const pw = (authPasswordInput ? authPasswordInput.value : '').trim();
       if (pw === ADMIN_PASSWORD) {
-        isAuthenticated = true;
-        openAdminBtn.classList.add('authed');
-        adminBtnText.textContent = 'Admin (Unlocked)';
-        closeAuthModal();
-        showToast('Admin access granted');
-        if (pendingAction) {
-          const action = pendingAction;
-          pendingAction = null;
-          action();
+        unlockAdmin();
+
+        const nextAction = pendingAction;
+        pendingAction = null;
+        if (typeof nextAction === 'function') {
+          try {
+            nextAction();
+          } catch (err) {
+            openAdminHub('add');
+          }
         } else {
           openAdminHub('add');
         }
       } else {
-        authError.style.display = 'block';
-        authPasswordInput.value = '';
-        authPasswordInput.focus();
+        if (authError) authError.style.display = 'block';
+        if (authPasswordInput) {
+          authPasswordInput.value = '';
+          authPasswordInput.focus();
+        }
       }
-    });
+    }
 
-    openAdminBtn.addEventListener('click', () => {
-      requireAuth(() => {
-        openAdminHub('add');
+    if (authSubmitBtn) {
+      authSubmitBtn.addEventListener('click', handleUnlock);
+    }
+
+    if (authPasswordInput) {
+      authPasswordInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          handleUnlock();
+        }
       });
-    });
+    }
+
+    if (openAdminBtn) {
+      openAdminBtn.addEventListener('click', () => {
+        if (isAuthenticated) {
+          // If already authenticated, clicking it immediately locks!
+          lockAdmin();
+        } else {
+          requireAuth(() => {
+            openAdminHub('add');
+          });
+        }
+      });
+    }
 
     // ==========================================
     // ADMIN HUB MODAL & TABS
     // ==========================================
     function openAdminHub(tabName = 'add', kitToLoad = null) {
+      hideModal(authModal);
       switchTab(tabName);
+
       if (kitToLoad) {
-        selectToolForEditing(kitToLoad);
+        loadToolIntoEditForm(kitToLoad);
       }
-      adminHubModal.classList.add('active');
+
+      showModal(adminHubModal);
     }
 
     function closeAdminHub() {
-      adminHubModal.classList.remove('active');
+      hideModal(adminHubModal);
     }
 
-    closeAdminHubBtn.addEventListener('click', closeAdminHub);
+    if (closeAdminHubBtn) closeAdminHubBtn.addEventListener('click', closeAdminHub);
+    if (lockAdminModalBtn) lockAdminModalBtn.addEventListener('click', lockAdmin);
 
     function switchTab(tabName) {
-      tabBtnAdd.classList.toggle('active', tabName === 'add');
-      tabBtnEdit.classList.toggle('active', tabName === 'edit');
-      tabBtnManage.classList.toggle('active', tabName === 'manage');
+      if (tabBtnAdd) tabBtnAdd.classList.toggle('active', tabName === 'add');
+      if (tabBtnEdit) tabBtnEdit.classList.toggle('active', tabName === 'edit');
+      if (tabBtnManage) tabBtnManage.classList.toggle('active', tabName === 'manage');
 
-      tabContentAdd.classList.toggle('active', tabName === 'add');
-      tabContentEdit.classList.toggle('active', tabName === 'edit');
-      tabContentManage.classList.toggle('active', tabName === 'manage');
+      if (tabContentAdd) tabContentAdd.classList.toggle('active', tabName === 'add');
+      if (tabContentEdit) tabContentEdit.classList.toggle('active', tabName === 'edit');
+      if (tabContentManage) tabContentManage.classList.toggle('active', tabName === 'manage');
 
       if (tabName === 'add') {
         initAddTab();
@@ -1281,12 +2107,13 @@
       }
     }
 
-    tabBtnAdd.addEventListener('click', () => switchTab('add'));
-    tabBtnEdit.addEventListener('click', () => switchTab('edit'));
-    tabBtnManage.addEventListener('click', () => switchTab('manage'));
+    if (tabBtnAdd) tabBtnAdd.addEventListener('click', () => switchTab('add'));
+    if (tabBtnEdit) tabBtnEdit.addEventListener('click', () => switchTab('edit'));
+    if (tabBtnManage) tabBtnManage.addEventListener('click', () => switchTab('manage'));
 
-    // TAB 1: ADD
+    // TAB 1: ADD ENTRY
     function initAddTab() {
+      if (!mFamilySelect) return;
       mFamilySelect.innerHTML = '<option value="">-- Choose Existing Family --</option>';
       const families = uniq(kitData.map(k => k.family)).sort();
       families.forEach(f => {
@@ -1300,50 +2127,62 @@
       customOpt.textContent = '+ Add New Family Name...';
       mFamilySelect.appendChild(customOpt);
 
-      if (familyEl.value) {
+      if (familyEl && familyEl.value) {
         mFamilySelect.value = familyEl.value;
-        mFamilyCustom.style.display = 'none';
+        if (mFamilyCustom) mFamilyCustom.style.display = 'none';
       } else {
         mFamilySelect.value = '';
-        mFamilyCustom.style.display = 'none';
+        if (mFamilyCustom) mFamilyCustom.style.display = 'none';
       }
 
-      mFamilyCustom.value = '';
-      mAsset.value = assetEl.value || '';
-      mMaintenance.value = maintenanceEl.value || 'SLS';
-      mMaintenanceCustom.style.display = 'none';
-      mLevel.value = levelEl.value || '1';
-      mLevelCustom.style.display = 'none';
-      mKit.value = '';
-      mNotes.value = '';
+      if (mFamilyCustom) mFamilyCustom.value = '';
+      if (mAsset) mAsset.value = (assetEl ? assetEl.value : '') || '';
+      if (mMaintenance) mMaintenance.value = (maintenanceEl ? maintenanceEl.value : '') || 'SLS';
+      if (mMaintenanceCustom) mMaintenanceCustom.style.display = 'none';
+      if (mLevel) mLevel.value = (levelEl ? levelEl.value : '') || '1';
+      if (mLevelCustom) mLevelCustom.style.display = 'none';
+      if (mKit) mKit.value = '';
+      if (mNotes) mNotes.value = '';
     }
 
-    cancelAddBtn.addEventListener('click', closeAdminHub);
+    if (cancelAddBtn) cancelAddBtn.addEventListener('click', closeAdminHub);
 
-    mFamilySelect.addEventListener('change', () => {
-      mFamilyCustom.style.display = mFamilySelect.value === '__custom__' ? 'block' : 'none';
-      if (mFamilySelect.value === '__custom__') mFamilyCustom.focus();
-    });
+    if (mFamilySelect) {
+      mFamilySelect.addEventListener('change', () => {
+        if (mFamilyCustom) {
+          mFamilyCustom.style.display = mFamilySelect.value === '__custom__' ? 'block' : 'none';
+          if (mFamilySelect.value === '__custom__') mFamilyCustom.focus();
+        }
+      });
+    }
 
-    mMaintenance.addEventListener('change', () => {
-      mMaintenanceCustom.style.display = mMaintenance.value === 'Custom' ? 'block' : 'none';
-      if (mMaintenance.value === 'Custom') mMaintenanceCustom.focus();
-    });
+    if (mMaintenance) {
+      mMaintenance.addEventListener('change', () => {
+        if (mMaintenanceCustom) {
+          mMaintenanceCustom.style.display = mMaintenance.value === 'Custom' ? 'block' : 'none';
+          if (mMaintenance.value === 'Custom') mMaintenanceCustom.focus();
+        }
+      });
+    }
 
-    mLevel.addEventListener('change', () => {
-      mLevelCustom.style.display = mLevel.value === 'Custom' ? 'block' : 'none';
-      if (mLevel.value === 'Custom') mLevelCustom.focus();
-    });
+    if (mLevel) {
+      mLevel.addEventListener('change', () => {
+        if (mLevelCustom) {
+          mLevelCustom.style.display = mLevel.value === 'Custom' ? 'block' : 'none';
+          if (mLevel.value === 'Custom') mLevelCustom.focus();
+        }
+      });
+    }
 
-    addKitForm.addEventListener('submit', (e) => {
-      e.preventDefault();
+    function handleSaveAddKit(e) {
+      if (e) e.preventDefault();
 
-      const fam = mFamilySelect.value === '__custom__' ? mFamilyCustom.value.trim() : mFamilySelect.value.trim();
-      const asset = mAsset.value.trim();
-      const maint = mMaintenance.value === 'Custom' ? mMaintenanceCustom.value.trim() : mMaintenance.value.trim();
-      const lvl = mLevel.value === 'Custom' ? mLevelCustom.value.trim() : mLevel.value.trim();
-      const kit = mKit.value.trim();
-      const notes = mNotes.value.trim();
+      const fam = (mFamilySelect.value === '__custom__' ? mFamilyCustom.value : mFamilySelect.value).trim();
+      const asset = (mAsset ? mAsset.value : '').trim();
+      const maint = (mMaintenance.value === 'Custom' ? mMaintenanceCustom.value : mMaintenance.value).trim();
+      const lvl = (mLevel.value === 'Custom' ? mLevelCustom.value : mLevel.value).trim();
+      const kit = (mKit ? mKit.value : '').trim();
+      const notes = (mNotes ? mNotes.value : '').trim();
 
       if (!fam || !asset || !maint || !lvl || !kit) {
         showToast('Please fill out all required fields.');
@@ -1361,7 +2200,6 @@
       if (existingIdx >= 0) {
         kitData[existingIdx].kit = kit;
         kitData[existingIdx].notes = notes;
-        kitData[existingIdx].isCustom = true;
       } else {
         kitData.unshift({
           family: fam,
@@ -1369,39 +2207,68 @@
           maintenance: maint,
           level: lvl,
           kit: kit,
-          notes: notes,
-          isCustom: true
+          notes: notes
         });
       }
 
       saveKitData();
-      closeAdminHub();
       populateFamilies();
-      showToast(`Saved Kit #${kit} for ${asset}!`);
+      updateKitCount();
 
-      // Auto select
-      familyEl.value = fam;
-      familyEl.dispatchEvent(new Event('change'));
+      // Clear add form inputs for next entry
+      if (mAsset) mAsset.value = '';
+      if (mKit) mKit.value = '';
+      if (mNotes) mNotes.value = '';
 
-      setTimeout(() => {
-        assetEl.value = asset;
-        assetEl.dispatchEvent(new Event('change'));
+      if (downloadAfter) {
+        downloadUpdatedSharePointHtml();
+        showToast(`Saved Kit #${kit} for ${asset} & downloaded file! Drag & drop to overwrite in SharePoint.`);
+      } else {
+        showToast(`Saved Kit #${kit} for ${asset}! Click 'Download for SharePoint' to update file in SharePoint.`);
+      }
+
+      // Auto select in finder
+      if (familyEl) {
+        familyEl.value = fam;
+        familyEl.dispatchEvent(new Event('change'));
 
         setTimeout(() => {
-          maintenanceEl.value = maint;
-          maintenanceEl.dispatchEvent(new Event('change'));
+          if (assetEl) {
+            assetEl.value = asset;
+            assetEl.dispatchEvent(new Event('change'));
 
-          setTimeout(() => {
-            levelEl.value = lvl;
-            levelEl.dispatchEvent(new Event('change'));
-          }, 40);
+            setTimeout(() => {
+              if (maintenanceEl) {
+                maintenanceEl.value = maint;
+                maintenanceEl.dispatchEvent(new Event('change'));
+
+                setTimeout(() => {
+                  if (levelEl) {
+                    levelEl.value = lvl;
+                    levelEl.dispatchEvent(new Event('change'));
+                  }
+                }, 40);
+              }
+            }, 40);
+          }
         }, 40);
-      }, 40);
-    });
+      }
+    }
+
+    if (addKitForm) {
+      addKitForm.addEventListener('submit', (e) => handleSaveAddKit(e, false));
+    }
+    if (saveAddKitBtn) {
+      saveAddKitBtn.addEventListener('click', (e) => handleSaveAddKit(e, false));
+    }
+    if (saveAndDownloadAddBtn) {
+      saveAndDownloadAddBtn.addEventListener('click', (e) => handleSaveAddKit(e, true));
+    }
 
     // TAB 2: EDIT PART NUMBER
     function renderEditToolList() {
-      const q = (editFilterInput.value || '').trim().toLowerCase();
+      if (!editToolListBox) return;
+      const q = (editFilterInput ? editFilterInput.value : '').trim().toLowerCase();
       const filtered = kitData.filter(k =>
         !q ||
         k.asset.toLowerCase().includes(q) ||
@@ -1415,9 +2282,9 @@
         return;
       }
 
-      filtered.slice(0, 30).forEach(item => {
+      filtered.slice(0, 40).forEach(item => {
         const div = document.createElement('div');
-        div.className = 'tool-list-item' + (selectedToolForEditing === item ? ' selected' : '');
+        div.className = 'tool-list-item' + (currentToolToEdit === item ? ' selected' : '');
         div.innerHTML = `
           <div>
             <strong>${item.asset}</strong>
@@ -1425,50 +2292,239 @@
           </div>
           <span style="font-family:monospace; color:#d60000; font-weight:bold;">${item.kit}</span>
         `;
-        div.addEventListener('click', () => selectToolForEditing(item));
+        div.addEventListener('click', () => loadToolIntoEditForm(item));
         editToolListBox.appendChild(div);
       });
     }
 
-    editFilterInput.addEventListener('input', renderEditToolList);
-
-    function selectToolForEditing(tool) {
-      selectedToolForEditing = tool;
-      renderEditToolList();
-      editSelectedToolHeader.textContent = `Editing Part Number for ${tool.asset} (${tool.family} - ${tool.maintenance} Level ${tool.level})`;
-      editPartNumberInput.value = tool.kit;
-      editNotesInput.value = tool.notes || '';
-      editToolFormArea.style.display = 'block';
-      setTimeout(() => editPartNumberInput.focus(), 50);
+    if (editFilterInput) {
+      editFilterInput.addEventListener('input', renderEditToolList);
     }
 
-    cancelEditBtn.addEventListener('click', () => {
-      editToolFormArea.style.display = 'none';
-      selectedToolForEditing = null;
+    function loadToolIntoEditForm(tool) {
+      currentToolToEdit = tool;
       renderEditToolList();
-    });
+      if (editSelectedToolHeader) {
+        editSelectedToolHeader.textContent = `Editing Part Number for ${tool.asset} (${tool.family} - ${tool.maintenance} Level ${tool.level})`;
+      }
+      if (editPartNumberInput) editPartNumberInput.value = tool.kit;
+      if (editNotesInput) editNotesInput.value = tool.notes || '';
+      if (editToolFormArea) editToolFormArea.style.display = 'block';
+      setTimeout(() => {
+        if (editPartNumberInput) editPartNumberInput.focus();
+      }, 50);
+    }
 
-    saveEditBtn.addEventListener('click', () => {
-      if (!selectedToolForEditing) return;
-      const newKit = editPartNumberInput.value.trim();
+    if (cancelEditBtn) {
+      cancelEditBtn.addEventListener('click', () => {
+        if (editToolFormArea) editToolFormArea.style.display = 'none';
+        currentToolToEdit = null;
+        renderEditToolList();
+      });
+    }
+
+    function handleSaveEditKit(downloadAfter = false) {
+      if (!currentToolToEdit) return;
+      const newKit = (editPartNumberInput ? editPartNumberInput.value : '').trim();
       if (!newKit) {
         showToast('Kit part number cannot be empty.');
         return;
       }
 
-      selectedToolForEditing.kit = newKit;
-      selectedToolForEditing.notes = editNotesInput.value.trim();
-      selectedToolForEditing.isCustom = true;
+      currentToolToEdit.kit = newKit;
+      if (editNotesInput) currentToolToEdit.notes = editNotesInput.value.trim();
       saveKitData();
 
-      closeAdminHub();
-      showToast(`Corrected ${selectedToolForEditing.asset} Part #${newKit}!`);
+      const toolName = currentToolToEdit.asset;
+      renderEditToolList();
       renderResult();
-    });
+
+      if (downloadAfter) {
+        downloadUpdatedSharePointHtml();
+        showToast(`Corrected ${toolName} Part #${newKit} & downloaded file! Drag & drop into SharePoint.`);
+      } else {
+        showToast(`Corrected ${toolName} Part #${newKit}! Click 'Download for SharePoint' to update file in SharePoint.`);
+      }
+    }
+
+    if (saveEditBtn) {
+      saveEditBtn.addEventListener('click', () => handleSaveEditKit(false));
+    }
+    if (saveAndDownloadEditBtn) {
+      saveAndDownloadEditBtn.addEventListener('click', () => handleSaveEditKit(true));
+    }
+
+    // ==========================================
+    // SHAREPOINT HTML EXPORT & OVERWRITE DOWNLOAD
+    // ==========================================
+    function downloadUpdatedSharePointHtml() {
+      try {
+        const clone = document.documentElement.cloneNode(true);
+
+        // 1. Ensure all modal overlays are closed and completely hidden
+        const modals = clone.querySelectorAll('.modal-overlay');
+        modals.forEach(m => {
+          m.classList.remove('active');
+          m.style.display = 'none';
+        });
+
+        // 2. Ensure help message is closed
+        const help = clone.querySelector('#helpMessage');
+        if (help) help.style.display = 'none';
+
+        // 3. Reset admin button state to default unauthenticated "Admin" state
+        const adminBtn = clone.querySelector('#openAdminBtn');
+        if (adminBtn) {
+          adminBtn.className = 'btn-admin';
+          const textSpan = adminBtn.querySelector('#adminBtnText');
+          if (textSpan) textSpan.textContent = 'Admin';
+          adminBtn.title = 'Admin Console (Click to unlock)';
+        }
+
+        // 4. Clear sensitive password fields and temporary form inputs
+        const pwd = clone.querySelector('#authPassword');
+        if (pwd) {
+          pwd.value = '';
+          pwd.removeAttribute('value');
+        }
+        const authErr = clone.querySelector('#authError');
+        if (authErr) authErr.style.display = 'none';
+
+        // 5. Clear add kit form
+        ['mAsset', 'mKit', 'mNotes', 'mFamilyCustom', 'mMaintenanceCustom', 'mLevelCustom'].forEach(id => {
+          const el = clone.querySelector('#' + id);
+          if (el) {
+            el.value = '';
+            el.removeAttribute('value');
+            if (id.includes('Custom')) el.style.display = 'none';
+          }
+        });
+        const mFam = clone.querySelector('#mFamilySelect');
+        if (mFam) mFam.value = '';
+
+        // 6. Clear edit kit area
+        const editArea = clone.querySelector('#editToolFormArea');
+        if (editArea) editArea.style.display = 'none';
+        ['editFilterInput', 'editPartNumberInput', 'editNotesInput', 'manageFilterInput'].forEach(id => {
+          const el = clone.querySelector('#' + id);
+          if (el) {
+            el.value = '';
+            el.removeAttribute('value');
+          }
+        });
+        const editList = clone.querySelector('#editToolListBox');
+        if (editList) editList.innerHTML = '';
+        const manageList = clone.querySelector('#manageToolListBox');
+        if (manageList) manageList.innerHTML = '';
+
+        // 7. Reset active tab in admin modal to Tab 1
+        const tabBtns = clone.querySelectorAll('.admin-tab-btn');
+        tabBtns.forEach((b, idx) => {
+          if (idx === 0) b.classList.add('active');
+          else b.classList.remove('active');
+        });
+        const tabContents = clone.querySelectorAll('.tab-content');
+        tabContents.forEach((c, idx) => {
+          if (idx === 0) c.classList.add('active');
+          else c.classList.remove('active');
+        });
+
+        // 8. Reset main finder dropdowns and result area so it starts clean in main console
+        const famSelect = clone.querySelector('#family');
+        if (famSelect) {
+          famSelect.innerHTML = '<option value="" selected>Select Family</option>';
+        }
+        const assetSelect = clone.querySelector('#asset');
+        if (assetSelect) {
+          assetSelect.innerHTML = '<option value="" selected>Select Asset</option>';
+          assetSelect.disabled = true;
+        }
+        const maintSelect = clone.querySelector('#maintenance');
+        if (maintSelect) {
+          maintSelect.innerHTML = '<option value="" selected>Select Maintenance Type</option>';
+          maintSelect.disabled = true;
+        }
+        const levelSelect = clone.querySelector('#level');
+        if (levelSelect) {
+          levelSelect.innerHTML = '<option value="" selected>Select Level</option>';
+          levelSelect.disabled = true;
+        }
+        const resultArea = clone.querySelector('#result');
+        if (resultArea) {
+          resultArea.innerHTML = `
+            <div class="result-placeholder">
+              <div style="font-size: 2em; margin-bottom: 8px; opacity: 0.7;">🔍</div>
+              <div>Select a Sonde tool to view maintenance kits</div>
+            </div>
+          `;
+        }
+
+        // 9. Update the script content in the clone to embed the current kitData and new DATA_VERSION
+        const scripts = clone.querySelectorAll('script');
+        scripts.forEach(script => {
+          let code = script.textContent;
+          if (code && (code.includes('INITIAL_KITS') || code.includes('EMBEDDED_DATASET_START'))) {
+            const newVersion = Date.now();
+            const updatedDataJson = JSON.stringify(kitData, null, 2);
+            
+            const startMarker = '// === EMBEDDED_DATASET_START ===';
+            const endMarker = '// === EMBEDDED_DATASET_END ===';
+            
+            if (code.includes(startMarker) && code.includes(endMarker)) {
+              const pattern = new RegExp(startMarker + '[\\s\\S]*?' + endMarker);
+              code = code.replace(pattern, `${startMarker}\n    const DATA_VERSION = '${newVersion}';\n    const INITIAL_KITS = ${updatedDataJson};\n    ${endMarker}`);
+            } else {
+              code = code.replace(
+                /const INITIAL_KITS\s*=\s*\[[\s\S]*?\];/,
+                `const DATA_VERSION = '${newVersion}';\n    const INITIAL_KITS = ${updatedDataJson};`
+              );
+            }
+            script.textContent = code;
+          }
+        });
+
+        const fullHtml = '<!DOCTYPE html>\n' + clone.outerHTML;
+
+        // Trigger download of the HTML file
+        let downloadFilename = 'Wireline_SL_Kit_Finder.html';
+        try {
+          const currentPath = window.location.pathname.split('/').pop();
+          if (currentPath && currentPath.endsWith('.html')) {
+            downloadFilename = currentPath;
+          }
+        } catch (e) {}
+
+        const blob = new Blob([fullHtml], { type: 'text/html;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = downloadFilename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(() => URL.revokeObjectURL(url), 2000);
+
+        showToast(`Downloaded updated HTML (${kitData.length} kits)! Drag & drop to overwrite file in SharePoint.`);
+      } catch (err) {
+        console.error('Export error:', err);
+        showToast('Failed to download HTML file: ' + err.message);
+      }
+    }
+
+    if (adminDownloadHtmlBtn) {
+      adminDownloadHtmlBtn.addEventListener('click', downloadUpdatedSharePointHtml);
+    }
+    if (bannerDownloadHtmlBtn) {
+      bannerDownloadHtmlBtn.addEventListener('click', downloadUpdatedSharePointHtml);
+    }
+    if (manageDownloadHtmlBtn) {
+      manageDownloadHtmlBtn.addEventListener('click', downloadUpdatedSharePointHtml);
+    }
 
     // TAB 3: MANAGE / DELETE
     function renderManageToolList() {
-      const q = (manageFilterInput.value || '').trim().toLowerCase();
+      if (!manageToolListBox) return;
+      const q = (manageFilterInput ? manageFilterInput.value : '').trim().toLowerCase();
       const filtered = kitData.filter(k =>
         !q ||
         k.asset.toLowerCase().includes(q) ||
@@ -1497,78 +2553,107 @@
           </div>
         `;
 
-        div.querySelector('[data-action="edit"]').addEventListener('click', (e) => {
-          e.stopPropagation();
-          switchTab('edit');
-          selectToolForEditing(item);
-        });
+        const editBtn = div.querySelector('[data-action="edit"]');
+        if (editBtn) {
+          editBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            switchTab('edit');
+            loadToolIntoEditForm(item);
+          });
+        }
 
-        div.querySelector('[data-action="delete"]').addEventListener('click', (e) => {
-          e.stopPropagation();
-          closeAdminHub();
-          promptDeleteKit(item);
-        });
+        const delBtn = div.querySelector('[data-action="delete"]');
+        if (delBtn) {
+          delBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            closeAdminHub();
+            promptDeleteKit(item);
+          });
+        }
 
         manageToolListBox.appendChild(div);
       });
     }
 
-    manageFilterInput.addEventListener('input', renderManageToolList);
-    closeManageBtn.addEventListener('click', closeAdminHub);
+    if (manageFilterInput) {
+      manageFilterInput.addEventListener('input', renderManageToolList);
+    }
+    if (closeManageBtn) {
+      closeManageBtn.addEventListener('click', closeAdminHub);
+    }
 
     // ==========================================
     // CONFIRM DELETE DIALOG (No window.confirm!)
     // ==========================================
     function promptDeleteKit(tool) {
       pendingToolToDelete = tool;
-      confirmDeleteMsg.innerHTML = `Are you sure you want to delete kit entry <strong>#${tool.kit}</strong> for <strong>${tool.asset}</strong> (${tool.family})?`;
-      confirmDeleteModal.classList.add('active');
+      if (confirmDeleteMsg) {
+        confirmDeleteMsg.innerHTML = `Are you sure you want to delete kit entry <strong>#${tool.kit}</strong> for <strong>${tool.asset}</strong> (${tool.family})?`;
+      }
+      showModal(confirmDeleteModal);
     }
 
-    cancelDeleteBtn.addEventListener('click', () => {
-      confirmDeleteModal.classList.remove('active');
-      pendingToolToDelete = null;
-    });
+    if (cancelDeleteBtn) {
+      cancelDeleteBtn.addEventListener('click', () => {
+        hideModal(confirmDeleteModal);
+        pendingToolToDelete = null;
+      });
+    }
 
-    confirmDeleteBtn.addEventListener('click', () => {
-      if (!pendingToolToDelete) return;
-      kitData = kitData.filter(k => k !== pendingToolToDelete);
-      saveKitData();
-      populateFamilies();
-      confirmDeleteModal.classList.remove('active');
-      showToast(`Deleted kit entry for ${pendingToolToDelete.asset}`);
-      pendingToolToDelete = null;
+    if (confirmDeleteBtn) {
+      confirmDeleteBtn.addEventListener('click', () => {
+        if (!pendingToolToDelete) return;
+        const deletedAsset = pendingToolToDelete.asset;
+        kitData = kitData.filter(k => k !== pendingToolToDelete);
+        saveKitData();
+        populateFamilies();
+        updateKitCount();
+        hideModal(confirmDeleteModal);
+        pendingToolToDelete = null;
+        lockAdmin(); // Auto-lock after deleting!
+        showToast(`Deleted kit entry for ${deletedAsset} and locked!`);
 
-      familyEl.value = '';
-      familyEl.dispatchEvent(new Event('change'));
-    });
-
-    // Reset Defaults with in-page confirmation
-    resetDefaultsBtn.addEventListener('click', () => {
-      requireAuth(() => {
-        pendingToolToDelete = { isResetAll: true };
-        confirmDeleteMsg.innerHTML = 'Reset all kit entries back to the factory SLB dataset? Any custom entries will be removed.';
-        confirmDeleteModal.classList.add('active');
-
-        // custom handler
-        const handleConfirmReset = () => {
-          kitData = JSON.parse(JSON.stringify(INITIAL_KITS));
-          saveKitData();
-          populateFamilies();
-          confirmDeleteModal.classList.remove('active');
-          showToast('Reset to factory SLB dataset.');
+        if (familyEl) {
           familyEl.value = '';
           familyEl.dispatchEvent(new Event('change'));
-          confirmDeleteBtn.removeEventListener('click', handleConfirmReset);
-        };
-        confirmDeleteBtn.addEventListener('click', handleConfirmReset, { once: true });
+        }
       });
-    });
+    }
 
-    // INIT
+    // Reset Defaults with in-page confirmation
+    if (resetDefaultsBtn) {
+      resetDefaultsBtn.addEventListener('click', () => {
+        requireAuth(() => {
+          if (confirmDeleteMsg) {
+            confirmDeleteMsg.innerHTML = 'Reset all kit entries back to the factory SLB dataset? Custom entries will be restored to defaults.';
+          }
+          showModal(confirmDeleteModal);
+
+          const handleConfirmReset = () => {
+            kitData = JSON.parse(JSON.stringify(INITIAL_KITS));
+            saveKitData();
+            populateFamilies();
+            updateKitCount();
+            hideModal(confirmDeleteModal);
+            lockAdmin();
+            showToast('Reset to factory SLB dataset and locked.');
+            if (familyEl) {
+              familyEl.value = '';
+              familyEl.dispatchEvent(new Event('change'));
+            }
+            confirmDeleteBtn.removeEventListener('click', handleConfirmReset);
+          };
+
+          confirmDeleteBtn.addEventListener('click', handleConfirmReset, { once: true });
+        });
+      });
+    }
+
+    // INITIALIZATION
     populateFamilies();
     updateKitCount();
   })();
   </script>
-</body>
-</html>
+
+
+</body></html>
