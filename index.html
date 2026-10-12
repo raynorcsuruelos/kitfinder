@@ -3903,7 +3903,7 @@
               />
               <button type="button" id="blueMmClearSearchBtn" class="bluemm-clear-btn" style="display:none;" title="Clear search">&times;</button>
             </div>
-            <button type="button" id="checkQtyBlueMmBtn" class="btn-bluemm-action" title="Open BlueMM (https://bluemm.slb.com) to check stock">
+            <button type="button" id="checkQtyBlueMmBtn" class="btn-bluemm-action" title="Open BlueMM (https://fmp.slb.com/pages/logout.html) to check stock">
               <span>Check QTY in BlueMM</span>
               <span style="font-size:1.1em;">&#8599;</span>
             </button>
@@ -3973,8 +3973,8 @@
       const blueMmBtn = document.getElementById('checkQtyBlueMmBtn');
       if (blueMmBtn) {
         blueMmBtn.addEventListener('click', () => {
-          window.open('https://bluemm.slb.com', '_blank');
-          showToast('Opening BlueMM (https://bluemm.slb.com)...');
+          window.open('https://fmp.slb.com/pages/logout.html', '_blank');
+          showToast('Opening BlueMM (https://fmp.slb.com/pages/logout.html)...');
         });
       }
 
@@ -4073,7 +4073,7 @@
           const verifyBtn = resultsContainer.querySelector('#inlineVerifyBlueMmBtn');
           if (verifyBtn) {
             verifyBtn.addEventListener('click', () => {
-              window.open('https://bluemm.slb.com', '_blank');
+              window.open('https://fmp.slb.com/pages/logout.html', '_blank');
             });
           }
         } else {
