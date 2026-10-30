@@ -1,0 +1,25 @@
+{
+  "id": "./",
+  "name": "My Personal Tool Kit",
+  "short_name": "Tool Kit",
+  "description": "Five wireline field tools in one place: Kuwait IC ARP Calc, WL Kit Finder, WL Tool FAQs, Kuwait IC Rotation Sked and WL Lab Store.",
+  "start_url": "./#/",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#ffffff",
+  "theme_color": "#003057",
+  "categories": ["productivity", "utilities"],
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "ARP Calc", "url": "./#/arp" },
+    { "name": "Kit Finder", "url": "./#/kits" },
+    { "name": "Tool FAQs", "url": "./#/faqs" },
+    { "name": "Rotation Sked", "url": "./#/sked" },
+    { "name": "Lab Store", "url": "./#/lab" }
+  ]
+}
