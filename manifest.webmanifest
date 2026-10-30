@@ -1,0 +1,26 @@
+{
+  "id": "./",
+  "name": "My Personal WL Tool Kit",
+  "short_name": "WL Tool Kit",
+  "description": "Wireline toolkit with ARP Calculator, Kit Finder, Tool FAQs, Rotation Schedule and Lab Store.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f2f6fa",
+  "theme_color": "#003057",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
